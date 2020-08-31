@@ -1,7 +1,7 @@
 import { UnitState } from "./unit-state";
 import { UnitIdleState } from "./unit-idle-state";
 import { Map } from "./map";
-import { UnitMovingState } from "./unit-moving-state";
+//import { UnitMovingState } from "./unit-move-state";
 import { Unit, UnitTypes, MoveDirections } from "./unit";
 
 export class Bullet extends PIXI.Container {
@@ -18,7 +18,7 @@ export class Bullet extends PIXI.Container {
     constructor(unit: Unit, texture: PIXI.Texture) {
         super();
         this.owner = unit;
-        this.moveDirection = this.owner.states.moving.moveDirection;
+        //this.moveDirection = this.owner.states.moving.moveDirection;
         this.initView(texture);
 
     }

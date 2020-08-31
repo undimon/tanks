@@ -1,5 +1,5 @@
 export class State {
-    constructor(unit: Unit) {
+    constructor(args: any) {
     }
 
     public enter(): void {

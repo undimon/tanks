@@ -25,7 +25,9 @@ export class GameScene extends PIXI.Container {
         this.player = new Unit(UnitTypes.Player, resources["tank"].texture)
         this.player.x = this.map.width / 2;
         this.player.y = this.map.height / 2;
-        this.player.handleShoot = () => this.createBullet(this.player, resources["bullet"].texture);
+        this.player.isHitTheWall = () => this.map.checkCollisionUnitVsWall(this.player);
+        this.player.isHitTheUnit = () => this.checkCollisionUnitVsUnit(this.player);
+        this.player.shoot = () => this.createBullet(this.player, resources["bullet"].texture);
         this.units.push(this.player);
         this.addChild(this.player);
         
@@ -34,30 +36,26 @@ export class GameScene extends PIXI.Container {
             const spawnPoint: PIXI.Point = this.map.getRandomSpawnPoint();
             enemy.x = spawnPoint.x;
             enemy.y = spawnPoint.y;
-            enemy.handleShoot = () => this.createBullet(enemy, resources["bullet"].texture);
+            enemy.isHitTheWall = () => this.map.checkCollisionUnitVsWall(enemy);
+            enemy.isHitTheUnit = () => this.checkCollisionUnitVsUnit(enemy);
+            enemy.shoot = () => this.createBullet(enemy, resources["bullet"].texture);
             this.units.push(enemy);
             this.addChild(enemy);
         }, 5000);
     }
 
-    public onKeyDown(event: KeyboardEvent): void {
-        this.player.handleKeyDown(event);
-    }
-
-    public onKeyUp(event: KeyboardEvent): void {
-        this.player.handleKeyUp(event);
-    }
-
     public update(): void {
+        this.player.update();
+
         this.units.forEach(unit => {
             if (unit.type === UnitTypes.Enemy) unit.update();
         });
-        this.bullets.forEach(bullet => {
-            bullet.update();
-        });
-        this.checkCollisionUnitsVsWalls();
-        this.checkCollisionUnitsVsUnits();
-        this.checkCollisionUnitsVsBullets();
+        // this.bullets.forEach(bullet => {
+        //     bullet.update();
+        // });
+        //this.checkCollisionUnitsVsWalls();
+        // this.checkCollisionUnitsVsUnits();
+        // this.checkCollisionUnitsVsBullets();
     }  
 
     public createBullet(unit: Unit, texture: PIXI.Texture) {
@@ -68,33 +66,20 @@ export class GameScene extends PIXI.Container {
         this.addChild(bullet);
     }
 
-    public checkForCollision(a: any, b: any, size: number): boolean {
-        return (Math.abs(a.x - b.x) <= size && Math.abs(a.y - b.y) <= size);
-    }
-
-    public checkCollisionUnitsVsWalls(): void {
-        this.map.items.forEach(wall => {
-            if (wall.type === MapItemType.EnemySpawnPoint) return;
-            this.units.forEach(unit => {
-                if (this.checkForCollision(wall, unit, 20)) unit.handleWallCollision();
-            });
+    public checkCollisionUnitVsUnit(unit: Unit): boolean {
+        let hasCollision: boolean = false;
+        this.units.forEach(otherUnit => {
+            if (unit === otherUnit) return;
+            if (Utils.checkForCollision(unit, otherUnit, 20)) hasCollision = true;
         });
-    }
-
-    public checkCollisionUnitsVsUnits(): void {
-        this.units.forEach(unit1 => {
-            this.units.forEach(unit2 => {
-                if (unit1 === unit2) return;
-                if (this.checkForCollision(unit1, unit2, 20)) unit1.handleUnitCollision();
-            });
-        });
+        return hasCollision;
     }
 
     public checkCollisionUnitsVsBullets(): void {
         this.units.forEach(unit => {
             this.bullets.forEach(bullet => {
                 if (bullet.owner === unit) return;
-                if (this.checkForCollision(unit, bullet, 20)) {
+                if (Utils.checkForCollision(unit, bullet, 20)) {
                     this.bullets = this.bullets.filter(b => b !== bullet);
                     this.removeChild(bullet);
 

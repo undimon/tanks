@@ -1,28 +1,16 @@
 import { UnitState } from "./unit-state";
-import { Unit } from "./unit";
-import { UnitMovingState } from "./unit-moving-state";
+import { GameManager } from "./Index";
 
 export class UnitIdleState extends UnitState {
-
-    public onEnter(): void {
+    public enter(): void {
         this.unit.scale.set(1);
     }
 
-    public handleKeyUp(key: any): void {
-        this.onEnter();
-    }
-
-    public handleKeyDown(key: any): void {
-        this.unit.changeState(this.unit.states.moving);
-        this.unit.state.handleKeyDown(key);
-    }
-
-    public move(): void {
-        this.unit.changeState(this.unit.states.moving);
-        //this.unit.state = new UnitMovingState(this.unit);
-        this.unit.state.move();
-    }
-
-    public update(): void {
+    public execute(): void {
+        const keys = GameManager.getInstance().keys;
+       
+        if (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight']) {
+            this.unit.fsm.transition('move');
+        }
     }
 }

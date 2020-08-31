@@ -1,13 +1,14 @@
 import { UnitState } from "./unit-state";
 import { UnitIdleState } from "./unit-idle-state";
 import { Map } from "./map";
-import { UnitMovingState } from "./unit-moving-state";
+import { UnitMoveState } from "././unit-move-state
+import { FSM } from "./fsm";
 
 export enum UnitTypes {
     Player,
     Enemy
 }
-s
+
 export enum MoveDirections {
     Up = 1,
     Down = -1,
@@ -18,25 +19,24 @@ export enum MoveDirections {
 export class Unit extends PIXI.Container {
     public type: UnitTypes;
     public fsm: FSM;
-    public state: UnitState;
     public virtualSize: any = {
         width: 36,
         height: 36
     }; 
-    public states: any = {
-        idle: new UnitIdleState(this),
-        moving: new UnitMovingState(this),
-    }
-    public skin: PIXI.Sprite;
-    public handleShoot: Function;
 
+    public isHitTheWall: Function;
+    public isHitTheUnit: Function;
+    public shoot: Function;
+    public skin: PIXI.Sprite;
+    
     constructor(type: UnitTypes, texture: PIXI.Texture) {
         super();
         this.type = type;
         this.initView(texture);
-
-
-        this.changeState(this.states.idle);
+        this.fsm = new FSM('idle', {
+            idle: new UnitIdleState(this),
+            move: new UnitMoveState(this)
+        });
     }
 
     private initView(texture: PIXI.Texture): void {
@@ -46,21 +46,8 @@ export class Unit extends PIXI.Container {
         this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1);
         
         setInterval(() => {
-            this.handleShoot();
+            this.shoot();
         }, 3000);
-    }
-
-    public changeState(state: UnitState): void {
-        this.state = state;
-        this.state.onEnter();
-    }
-
-    public handleKeyDown(event: KeyboardEvent): void {
-        this.state.handleKeyDown(event);
-    }
-
-    public handleKeyUp(event: KeyboardEvent): void {
-        this.state.handleKeyUp(event);
     }
 
     // Used by enemies
@@ -68,16 +55,20 @@ export class Unit extends PIXI.Container {
         //this.state.handleKeyUp(key);
     }
 
+    // public isHitTheWall(): void {
+
+    // }
+
     public handleCollision(direction: MoveDirections): void {
 
     }
 
-    public handleWallCollision(): void {
-        this.state.handleWallCollision();
-    }
+    // public handleWallCollision(): void {
+    //     this.state.handleWallCollision();
+    // }
 
     public handleUnitCollision(): void {
-        this.state.handleUnitCollision();
+        //this.state.handleUnitCollision();
     }
 
     public handleBulletCollision(): void {
@@ -85,6 +76,6 @@ export class Unit extends PIXI.Container {
     }
 
     public update(): void {
-
+        this.fsm.step();    
     }
 }

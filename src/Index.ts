@@ -12,14 +12,17 @@ export enum SceneSize {
     height = 720
 };
 
-export class GameManager{
+export class GameManager {
+    private static instance: GameManager;
     private app: PIXI.Application;
     private gameScene: GameScene;
+    public keys: any = {};
 
     /**
      * code entry point, it is triggered by the window.onload event found at the bottom of this class
      */
-    public constructor(){
+    private constructor() {
+        
         this.app = new PIXI.Application({ width: SceneSize.width, height: SceneSize.height, backgroundColor: 0xFFFFFF });
         document.body.appendChild(this.app.view);
 
@@ -34,6 +37,14 @@ export class GameManager{
         this.resize();
     }
 
+    public static getInstance(): GameManager {
+    
+        if (!GameManager.instance) {
+            GameManager.instance = new GameManager();
+        }
+        return GameManager.instance;
+    }
+
     /**
      * 
      * @param loader loader provided by the PIXI load event, useful for cleaning up any events attached to loader
@@ -44,17 +55,29 @@ export class GameManager{
         this.app.stage.addChild(this.gameScene);
         this.app.stage.scale.set(0.6, 0.6);
 
-        window.addEventListener('keydown', this.gameScene.onKeyDown.bind(this.gameScene));
-        window.addEventListener('keyup', this.gameScene.onKeyUp.bind(this.gameScene));
+        // window.addEventListener('keydown', this.gameScene.onKeyDown.bind(this.gameScene));
+        // window.addEventListener('keyup', this.gameScene.onKeyUp.bind(this.gameScene));
+
+        window.addEventListener('keydown', GameManager.handleKeyDown);
+        window.addEventListener('keyup', GameManager.handleKeyUp);
 
         this.app.ticker.add(() => {
             this.gameScene.update();
+            //console.log(this.keys);
+            
         });  
 
         //this.app.renderer.resize(500, 500);
     }
 
+    private static handleKeyDown(event: KeyboardEvent): void {
+        GameManager.instance.keys = {};
+        GameManager.instance.keys[event.code] = true;
+    }
 
+    private static  handleKeyUp(event: KeyboardEvent): void {
+        GameManager.instance.keys = {};
+    }
 
     // Resize function window
     private resize() {
@@ -71,5 +94,6 @@ export class GameManager{
  * some people like to add this into a seperate .js file
  */
 window.onload = function () {
-    new GameManager();
+    GameManager.getInstance();
+    //new GameManager();
 }

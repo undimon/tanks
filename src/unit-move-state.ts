@@ -1,37 +1,35 @@
 import { UnitState } from "./unit-state";
 import { MoveDirections } from "./unit";
-import { UnitIdleState } from "./unit-idle-state";
 import gsap from "gsap"; 
-import { MapItemType } from "./map";
+import { GameManager } from "./Index";
 
-export class UnitMovingState extends UnitState {
+export class UnitMoveState extends UnitState {
     public moveDirection: MoveDirections = MoveDirections.Down;
-    public speed = 5;
+    public speed = 2;
 
-    public onEnter(): void {
+    public enter(): void {
         this.unit.scale.set(0.95);
     }
 
-    public handleKeyDown(event: KeyboardEvent): void {
+    public execute(): void {
+        const keys = GameManager.getInstance().keys;
+        if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
+            this.unit.fsm.transition('idle');
+        }
 
-        if (event.key === 'ArrowUp') this.moveDirection = MoveDirections.Up
-        if (event.key === 'ArrowDown') this.moveDirection = MoveDirections.Down;
-        if (event.key === 'ArrowLeft') this.moveDirection = MoveDirections.Left;
-        if (event.key === 'ArrowRight') this.moveDirection = MoveDirections.Right;
+        if (keys['ArrowUp']) this.moveDirection = MoveDirections.Up;
+        if (keys['ArrowDown']) this.moveDirection = MoveDirections.Down;
+        if (keys['ArrowLeft']) this.moveDirection = MoveDirections.Left;
+        if (keys['ArrowRight']) this.moveDirection = MoveDirections.Right;
+
         this.move();
-    }
-
-    public handleKeyUp(key: any): void {
-        this.unit.changeState(this.unit.states.idle);
-        this.unit.state.handleKeyUp(key);
     }
 
     public move(): void {
         this.turnTo();
         this.moveTo();
-        // if (this.hasHitTheWall) {
-        //     this.handleCollision();
-        // }
+        if (this.unit.isHitTheWall()) this.handleWallCollision();        
+        if (this.unit.isHitTheUnit()) this.handleUnitCollision();        
     }
 
     public handleWallCollision(): void {
@@ -65,27 +63,5 @@ export class UnitMovingState extends UnitState {
         if (this.moveDirection === MoveDirections.Down) this.unit.y += this.speed;
         if (this.moveDirection === MoveDirections.Left) this.unit.x -= this.speed;
         if (this.moveDirection === MoveDirections.Right) this.unit.x += this.speed;
-    }
-
-    // public isHitTheWall(): boolean {
-    //     let isHit: boolean = false;
-    //     this.unit.map.items.forEach(wall => {
-    //         if (wall.type === MapItemType.EnemySpawnPoint) return;
-    //         // let a = this.unit.getBounds();
-    //         // let b = wall.getBounds();
-    //         let a = this.unit;
-    //         let b = wall;
-
-    //         if (Math.abs(a.x - b.x) <= 25 && Math.abs(a.y - b.y) <= 25) { 
-    //         //if (a.x + a.virtualSize.width > b.x && a.x < b.x + b.virtualSize.width && a.y + a.virtualSize.height > b.y && a.y < b.y + b.virtualSize.height) { 
-    //             isHit = true;
-    //             return;
-    //         }
-    //     });
-    //     return isHit;
-    // }
-
-    public update(): void {
-
     }
 }

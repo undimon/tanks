@@ -1,5 +1,6 @@
 import { MapItem } from "./map-item";
 import { Utils } from "./utils";
+import { Unit } from "./unit";
 
 export enum MapItemType {
     StoneWall = 1,
@@ -70,5 +71,14 @@ export class Map extends PIXI.Container {
         });
 
         return points[Utils.randomInt(0, points.length -1)];
+    }
+
+    public checkCollisionUnitVsWall(unit: Unit): boolean {
+        let hasCollision: boolean = false;
+        this.items.forEach(wall => {
+            if (wall.type === MapItemType.EnemySpawnPoint) return;
+            if (Utils.checkForCollision(wall, unit, 20)) hasCollision = true;
+        });
+        return hasCollision;
     }
 }

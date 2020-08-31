@@ -1,30 +1,17 @@
 import { Unit, MoveDirections } from "./unit";
+import { State } from "./state";
 
-export class UnitState {
+export class UnitState extends State {
     public unit: Unit;
 
-    constructor(unit: Unit) {
-        this.unit = unit;
+    constructor(args: any) {
+        super(args);
+        this.unit = args;
     }
 
-    public onEnter(): void {
+    public enter(): void {
     }
 
-    public handleKeyDown(event: KeyboardEvent): void {
-    }
-
-    public handleKeyUp(event: KeyboardEvent): void {
-    }
-
-    public move(): void {
-    }
-
-    public update(): void {
-    }
-
-    public handleWallCollision(): void {
-    }
-
-    public handleUnitCollision(): void {
+    public execute(): void {
     }
 }

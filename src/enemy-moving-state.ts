@@ -2,24 +2,22 @@ import { UnitState } from "./unit-state";
 import { Unit, MoveDirections } from "./unit";
 import { UnitIdleState } from "./unit-idle-state";
 import { Utils } from "./utils";
-import { UnitMovingState } from "./unit-moving-state";
+import { UnitMoveState } from "././unit-move-state
 
-export class EnemyMovingState extends UnitMovingState {
+export class EnemyMoveState extends UnitMoveState {
     public speed = 2;
 
-    public onEnter(): void {
-        super.onEnter();
+    public execute(): void {
+        this.move();
+    }
+
+    // public onEnter(): void {
+    //     super.onEnter();
         
-        setInterval(() => {
-            this.changeDirectionToRandom();
-        }, 3000);
-    }
-
-    public handleKeyUp(key: any): void {  
-    }
-
-    public handleKeyDown(key: any): void {
-    }
+    //     setInterval(() => {
+    //         this.changeDirectionToRandom();
+    //     }, 3000);
+    // }
 
     public handleWallCollision(): void {
         super.handleWallCollision();
@@ -43,7 +41,7 @@ export class EnemyMovingState extends UnitMovingState {
         if (key === 3) this.moveDirection = MoveDirections.Right;
     }
 
-    public update(): void {
+    // public update(): void {
 
-    }
+    // }
 }

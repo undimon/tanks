@@ -4,6 +4,8 @@ import { Utils } from "./utils";
 import { Unit, UnitTypes } from "./unit";
 import { Enemy } from "./enemy";
 import { Bullet } from "./bullet";
+import { GameManager } from "./Index";
+import { resources } from "pixi.js";
 
 export class GameScene extends PIXI.Container {
     private map: Map;
@@ -11,57 +13,65 @@ export class GameScene extends PIXI.Container {
     private units: Unit[] = [];
     private bullets: Bullet[] = [];
 
-    constructor(app: PIXI.Application, resources: PIXI.LoaderResource) {
+    constructor() {
         super();
-        this.init(app, resources);
+        this.init();
     }
 
-    private init(app, resources: PIXI.LoaderResource): void {
-        this.map = new Map(resources["wall"].texture)
+    private init(): void {
+        this.createMap();
+        this.createPlayer();
+        this.createEnemy();
+        this.startEnemiesGenerator();  
+    }
+
+    private createMap(): void {
+        this.map = new Map(GameManager.getInstance().resources["wall"].texture)
         this.map.x = 0;
         this.map.y = 0;
         this.addChild(this.map);
+    }
 
-        this.player = new Unit(UnitTypes.Player, resources["tank"].texture)
-        this.player.x = this.map.width / 2;
-        this.player.y = this.map.height / 2;
-        this.player.isHitTheWall = () => this.map.checkCollisionUnitVsWall(this.player);
-        this.player.isHitTheUnit = () => this.checkCollisionUnitVsUnit(this.player);
-        this.player.shoot = () => this.createBullet(this.player, resources["bullet"].texture);
-        this.units.push(this.player);
-        this.addChild(this.player);
-        
+    private startEnemiesGenerator(): void {
+        //Todo need to clear interval on scene exit
         setInterval(() => {
-            const enemy: Enemy = new Enemy(UnitTypes.Enemy, resources["enemy"].texture);
-            const spawnPoint: PIXI.Point = this.map.getRandomSpawnPoint();
-            enemy.x = spawnPoint.x;
-            enemy.y = spawnPoint.y;
-            enemy.isHitTheWall = () => this.map.checkCollisionUnitVsWall(enemy);
-            enemy.isHitTheUnit = () => this.checkCollisionUnitVsUnit(enemy);
-            enemy.shoot = () => this.createBullet(enemy, resources["bullet"].texture);
-            this.units.push(enemy);
-            this.addChild(enemy);
+            this.createEnemy();
         }, 5000);
     }
 
-    public update(): void {
-        this.player.update();
+    private createPlayer(): void {
+        const unit: Unit = new Unit(UnitTypes.Player, GameManager.getInstance().resources["tank"].texture)
+        unit.x = this.map.width / 2;
+        unit.y = this.map.height / 2;
+        this.finishUnitCreation(unit);
+    }
 
-        this.units.forEach(unit => {
-            if (unit.type === UnitTypes.Enemy) unit.update();
-        });
-        // this.bullets.forEach(bullet => {
-        //     bullet.update();
-        // });
+    private createEnemy(): void {
+        const unit: Enemy = new Enemy(UnitTypes.Enemy, GameManager.getInstance().resources["enemy"].texture)
+        const spawnPoint: PIXI.Point = this.map.getRandomSpawnPoint();
+        unit.x = spawnPoint.x;
+        unit.y = spawnPoint.y;
+        this.finishUnitCreation(unit);
+    }
+
+    private finishUnitCreation(unit: Unit): void {
+        unit.isHitTheWall = () => this.map.checkCollisionUnitVsWall(unit);
+        unit.isHitTheUnit = () => this.checkCollisionUnitVsUnit(unit);
+        unit.shoot = () => this.createBullet(unit);
+        this.units.push(unit);
+        this.addChild(unit);
+    }
+
+    public update(): void {
+        this.units.forEach(unit => unit.update());
+        this.bullets.forEach(bullet => bullet.update());
         //this.checkCollisionUnitsVsWalls();
-        // this.checkCollisionUnitsVsUnits();
-        // this.checkCollisionUnitsVsBullets();
+        //this.checkCollisionUnitsVsUnits();
+        //this.checkCollisionUnitsVsBullets();
     }  
 
-    public createBullet(unit: Unit, texture: PIXI.Texture) {
-        const bullet: Bullet = new Bullet(unit, texture);
-        bullet.x = unit.x;
-        bullet.y = unit.y;
+    public createBullet(unit: Unit) {
+        const bullet: Bullet = new Bullet(unit, GameManager.getInstance().resources["bullet"].texture);
         this.bullets.push(bullet);
         this.addChild(bullet);
     }
@@ -78,7 +88,7 @@ export class GameScene extends PIXI.Container {
     public checkCollisionUnitsVsBullets(): void {
         this.units.forEach(unit => {
             this.bullets.forEach(bullet => {
-                if (bullet.owner === unit) return;
+                if (bullet.unit === unit) return;
                 if (Utils.checkForCollision(unit, bullet, 20)) {
                     this.bullets = this.bullets.filter(b => b !== bullet);
                     this.removeChild(bullet);

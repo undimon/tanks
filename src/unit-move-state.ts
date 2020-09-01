@@ -15,6 +15,7 @@ export class UnitMoveState extends UnitState {
         const keys = GameManager.getInstance().keys;
         if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
             this.unit.fsm.transition('idle');
+            return;
         }
 
         if (keys['ArrowUp']) this.moveDirection = MoveDirections.Up;
@@ -56,6 +57,8 @@ export class UnitMoveState extends UnitState {
         if (this.moveDirection === MoveDirections.Left) angle = -90;   
         if (this.moveDirection === MoveDirections.Right) angle = 90;   
         gsap.to(this.unit.skin, { angle, duration: 0.3 });
+
+        this.unit.lookDirection = this.moveDirection;
     }
 
     public moveTo(): void {

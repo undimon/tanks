@@ -5,7 +5,7 @@ import { Map } from "./map";
 import { Unit, UnitTypes, MoveDirections } from "./unit";
 
 export class Bullet extends PIXI.Container {
-    public owner: Unit;
+    public unit: Unit;
     public moveDirection: MoveDirections;
     public speed = 8;
     public virtualSize: any = {
@@ -17,8 +17,8 @@ export class Bullet extends PIXI.Container {
 
     constructor(unit: Unit, texture: PIXI.Texture) {
         super();
-        this.owner = unit;
-        //this.moveDirection = this.owner.states.moving.moveDirection;
+        this.unit = unit;
+        this.moveDirection = unit.lookDirection;
         this.initView(texture);
 
     }
@@ -26,8 +26,10 @@ export class Bullet extends PIXI.Container {
     private initView(texture: PIXI.Texture): void {
         this.skin = new PIXI.Sprite(texture);
         this.skin.anchor.set(0.5);
+        this.skin.scale.set(0.5);
         this.addChild(this.skin);
-        this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1)        
+        this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1);
+        this.unit.setBulletInitialPosition(this);   
     }
 
     public handleWallCollision(): void {

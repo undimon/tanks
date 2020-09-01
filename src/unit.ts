@@ -1,8 +1,9 @@
 import { UnitState } from "./unit-state";
 import { UnitIdleState } from "./unit-idle-state";
 import { Map } from "./map";
-import { UnitMoveState } from "././unit-move-state
+import { UnitMoveState } from "././unit-move-state";
 import { FSM } from "./fsm";
+import { Bullet } from "./bullet";
 
 export enum UnitTypes {
     Player,
@@ -24,6 +25,7 @@ export class Unit extends PIXI.Container {
         height: 36
     }; 
 
+    public lookDirection: MoveDirections = MoveDirections.Up;
     public isHitTheWall: Function;
     public isHitTheUnit: Function;
     public shoot: Function;
@@ -33,7 +35,7 @@ export class Unit extends PIXI.Container {
         super();
         this.type = type;
         this.initView(texture);
-        this.fsm = new FSM('idle', {
+        this.fsm = new FSM({
             idle: new UnitIdleState(this),
             move: new UnitMoveState(this)
         });
@@ -50,17 +52,13 @@ export class Unit extends PIXI.Container {
         }, 3000);
     }
 
-    // Used by enemies
-    public move(): void {
-        //this.state.handleKeyUp(key);
-    }
-
-    // public isHitTheWall(): void {
-
-    // }
-
-    public handleCollision(direction: MoveDirections): void {
-
+    public setBulletInitialPosition(bullet: Bullet): void {
+        bullet.x = this.x + this.virtualSize.width / 2;
+        bullet.y = this.y + this.virtualSize.height / 2;
+        if (this.lookDirection === MoveDirections.Up) bullet.y = this.y;    
+        if (this.lookDirection === MoveDirections.Down) bullet.y = this.y + this.virtualSize.height;
+        if (this.lookDirection === MoveDirections.Left) bullet.x = this.x;  
+        if (this.lookDirection === MoveDirections.Right) bullet.x = this.x + this.virtualSize.width;
     }
 
     // public handleWallCollision(): void {

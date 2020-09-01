@@ -14,9 +14,10 @@ export enum SceneSize {
 
 export class GameManager {
     private static instance: GameManager;
-    private app: PIXI.Application;
+    public app: PIXI.Application;
     private gameScene: GameScene;
     public keys: any = {};
+    public resources: PIXI.LoaderResource;
 
     /**
      * code entry point, it is triggered by the window.onload event found at the bottom of this class
@@ -50,21 +51,18 @@ export class GameManager {
      * @param loader loader provided by the PIXI load event, useful for cleaning up any events attached to loader
      * @param resources resources provided by the PIXI load event, we use this to extract loaded items
      */
-    private onLoadComplete( loader: PIXI.Loader, resources: PIXI.LoaderResource){
-        this.gameScene = new GameScene(this.app, resources);
+    private onLoadComplete(loader: PIXI.Loader, resources: PIXI.LoaderResource){
+        this.resources = resources;
+
+        this.gameScene = new GameScene();
         this.app.stage.addChild(this.gameScene);
         this.app.stage.scale.set(0.6, 0.6);
-
-        // window.addEventListener('keydown', this.gameScene.onKeyDown.bind(this.gameScene));
-        // window.addEventListener('keyup', this.gameScene.onKeyUp.bind(this.gameScene));
 
         window.addEventListener('keydown', GameManager.handleKeyDown);
         window.addEventListener('keyup', GameManager.handleKeyUp);
 
         this.app.ticker.add(() => {
             this.gameScene.update();
-            //console.log(this.keys);
-            
         });  
 
         //this.app.renderer.resize(500, 500);

@@ -7,7 +7,7 @@
 		exports["typescript_intro"] = factory(require("PIXI"));
 	else
 		root["typescript_intro"] = factory(root["PIXI"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__2__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__8__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -91,14 +91,98 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(1);
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var unit_idle_state_1 = __webpack_require__(3);
+var unit_move_state_1 = __webpack_require__(5);
+var fsm_1 = __webpack_require__(6);
+var UnitTypes;
+(function (UnitTypes) {
+    UnitTypes[UnitTypes["Player"] = 0] = "Player";
+    UnitTypes[UnitTypes["Enemy"] = 1] = "Enemy";
+})(UnitTypes = exports.UnitTypes || (exports.UnitTypes = {}));
+var MoveDirections;
+(function (MoveDirections) {
+    MoveDirections[MoveDirections["Up"] = 1] = "Up";
+    MoveDirections[MoveDirections["Down"] = -1] = "Down";
+    MoveDirections[MoveDirections["Left"] = 2] = "Left";
+    MoveDirections[MoveDirections["Right"] = -2] = "Right";
+})(MoveDirections = exports.MoveDirections || (exports.MoveDirections = {}));
+var Unit = /** @class */ (function (_super) {
+    __extends(Unit, _super);
+    function Unit(type, texture) {
+        var _this = _super.call(this) || this;
+        _this.virtualSize = {
+            width: 36,
+            height: 36
+        };
+        _this.lookDirection = MoveDirections.Up;
+        _this.type = type;
+        _this.initView(texture);
+        _this.fsm = new fsm_1.FSM({
+            idle: new unit_idle_state_1.UnitIdleState(_this),
+            move: new unit_move_state_1.UnitMoveState(_this)
+        });
+        return _this;
+    }
+    Unit.prototype.initView = function (texture) {
+        var _this = this;
+        this.skin = new PIXI.Sprite(texture);
+        this.skin.anchor.set(0.5);
+        this.addChild(this.skin);
+        this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1);
+        setInterval(function () {
+            _this.shoot();
+        }, 3000);
+    };
+    Unit.prototype.setBulletInitialPosition = function (bullet) {
+        bullet.x = this.x + this.virtualSize.width / 2;
+        bullet.y = this.y + this.virtualSize.height / 2;
+        if (this.lookDirection === MoveDirections.Up)
+            bullet.y = this.y;
+        if (this.lookDirection === MoveDirections.Down)
+            bullet.y = this.y + this.virtualSize.height;
+        if (this.lookDirection === MoveDirections.Left)
+            bullet.x = this.x;
+        if (this.lookDirection === MoveDirections.Right)
+            bullet.x = this.x + this.virtualSize.width;
+    };
+    // public handleWallCollision(): void {
+    //     this.state.handleWallCollision();
+    // }
+    Unit.prototype.handleUnitCollision = function () {
+        //this.state.handleUnitCollision();
+    };
+    Unit.prototype.handleBulletCollision = function () {
+        //Need to clear interval for bullets
+    };
+    Unit.prototype.update = function () {
+        this.fsm.step();
+    };
+    return Unit;
+}(PIXI.Container));
+exports.Unit = Unit;
 
 
 /***/ }),
@@ -115,8 +199,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var PIXI = __importStar(__webpack_require__(2));
-var game_scene_1 = __webpack_require__(5);
+var PIXI = __importStar(__webpack_require__(8));
+var game_scene_1 = __webpack_require__(9);
 //Tile 36x36
 // Map 25x20
 var SceneSize;
@@ -155,16 +239,14 @@ var GameManager = /** @class */ (function () {
      */
     GameManager.prototype.onLoadComplete = function (loader, resources) {
         var _this = this;
-        this.gameScene = new game_scene_1.GameScene(this.app, resources);
+        this.resources = resources;
+        this.gameScene = new game_scene_1.GameScene();
         this.app.stage.addChild(this.gameScene);
         this.app.stage.scale.set(0.6, 0.6);
-        // window.addEventListener('keydown', this.gameScene.onKeyDown.bind(this.gameScene));
-        // window.addEventListener('keyup', this.gameScene.onKeyUp.bind(this.gameScene));
         window.addEventListener('keydown', GameManager.handleKeyDown);
         window.addEventListener('keyup', GameManager.handleKeyUp);
         this.app.ticker.add(function () {
             _this.gameScene.update();
-            //console.log(this.keys);
         });
         //this.app.renderer.resize(500, 500);
     };
@@ -196,9 +278,25 @@ window.onload = function () {
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__2__;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Utils = /** @class */ (function () {
+    function Utils() {
+    }
+    Utils.randomInt = function (min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    };
+    ;
+    Utils.checkForCollision = function (a, b, size) {
+        return (Math.abs(a.x - b.x) <= size && Math.abs(a.y - b.y) <= size);
+    };
+    return Utils;
+}());
+exports.Utils = Utils;
+
 
 /***/ }),
 /* 3 */
@@ -220,70 +318,25 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var unit_idle_state_1 = __webpack_require__(9);
-var unit_move_state_1 = __webpack_require__(11);
-var fsm_1 = __webpack_require__(12);
-var UnitTypes;
-(function (UnitTypes) {
-    UnitTypes[UnitTypes["Player"] = 0] = "Player";
-    UnitTypes[UnitTypes["Enemy"] = 1] = "Enemy";
-})(UnitTypes = exports.UnitTypes || (exports.UnitTypes = {}));
-var MoveDirections;
-(function (MoveDirections) {
-    MoveDirections[MoveDirections["Up"] = 1] = "Up";
-    MoveDirections[MoveDirections["Down"] = -1] = "Down";
-    MoveDirections[MoveDirections["Left"] = 2] = "Left";
-    MoveDirections[MoveDirections["Right"] = -2] = "Right";
-})(MoveDirections = exports.MoveDirections || (exports.MoveDirections = {}));
-var Unit = /** @class */ (function (_super) {
-    __extends(Unit, _super);
-    function Unit(type, texture) {
-        var _this = _super.call(this) || this;
-        _this.virtualSize = {
-            width: 36,
-            height: 36
-        };
-        _this.type = type;
-        _this.initView(texture);
-        _this.fsm = new fsm_1.FSM('idle', {
-            idle: new unit_idle_state_1.UnitIdleState(_this),
-            move: new unit_move_state_1.UnitMoveState(_this)
-        });
-        return _this;
+var unit_state_1 = __webpack_require__(4);
+var Index_1 = __webpack_require__(1);
+var UnitIdleState = /** @class */ (function (_super) {
+    __extends(UnitIdleState, _super);
+    function UnitIdleState() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Unit.prototype.initView = function (texture) {
-        var _this = this;
-        this.skin = new PIXI.Sprite(texture);
-        this.skin.anchor.set(0.5);
-        this.addChild(this.skin);
-        this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1);
-        setInterval(function () {
-            _this.shoot();
-        }, 3000);
+    UnitIdleState.prototype.enter = function () {
+        this.unit.scale.set(1);
     };
-    // Used by enemies
-    Unit.prototype.move = function () {
-        //this.state.handleKeyUp(key);
+    UnitIdleState.prototype.execute = function () {
+        var keys = Index_1.GameManager.getInstance().keys;
+        if (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight']) {
+            this.unit.fsm.transition('move');
+        }
     };
-    // public isHitTheWall(): void {
-    // }
-    Unit.prototype.handleCollision = function (direction) {
-    };
-    // public handleWallCollision(): void {
-    //     this.state.handleWallCollision();
-    // }
-    Unit.prototype.handleUnitCollision = function () {
-        //this.state.handleUnitCollision();
-    };
-    Unit.prototype.handleBulletCollision = function () {
-        //Need to clear interval for bullets
-    };
-    Unit.prototype.update = function () {
-        this.fsm.step();
-    };
-    return Unit;
-}(PIXI.Container));
-exports.Unit = Unit;
+    return UnitIdleState;
+}(unit_state_1.UnitState));
+exports.UnitIdleState = UnitIdleState;
 
 
 /***/ }),
@@ -306,7 +359,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var state_1 = __webpack_require__(10);
+var state_1 = __webpack_require__(12);
 var UnitState = /** @class */ (function (_super) {
     __extends(UnitState, _super);
     function UnitState(args) {
@@ -342,64 +395,218 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_1 = __webpack_require__(6);
-var utils_1 = __webpack_require__(8);
-var unit_1 = __webpack_require__(3);
+var unit_state_1 = __webpack_require__(4);
+var unit_1 = __webpack_require__(0);
+var gsap_1 = __importDefault(__webpack_require__(17));
+var Index_1 = __webpack_require__(1);
+var UnitMoveState = /** @class */ (function (_super) {
+    __extends(UnitMoveState, _super);
+    function UnitMoveState() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.moveDirection = unit_1.MoveDirections.Down;
+        _this.speed = 2;
+        return _this;
+    }
+    UnitMoveState.prototype.enter = function () {
+        this.unit.scale.set(0.95);
+    };
+    UnitMoveState.prototype.execute = function () {
+        var keys = Index_1.GameManager.getInstance().keys;
+        if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
+            this.unit.fsm.transition('idle');
+            return;
+        }
+        if (keys['ArrowUp'])
+            this.moveDirection = unit_1.MoveDirections.Up;
+        if (keys['ArrowDown'])
+            this.moveDirection = unit_1.MoveDirections.Down;
+        if (keys['ArrowLeft'])
+            this.moveDirection = unit_1.MoveDirections.Left;
+        if (keys['ArrowRight'])
+            this.moveDirection = unit_1.MoveDirections.Right;
+        this.move();
+    };
+    UnitMoveState.prototype.move = function () {
+        this.turnTo();
+        this.moveTo();
+        if (this.unit.isHitTheWall())
+            this.handleWallCollision();
+        if (this.unit.isHitTheUnit())
+            this.handleUnitCollision();
+    };
+    UnitMoveState.prototype.handleWallCollision = function () {
+        // Bounce back from wall
+        this.moveDirection = this.moveDirection * -1;
+        this.moveTo();
+        this.moveDirection = this.moveDirection * -1;
+    };
+    UnitMoveState.prototype.handleUnitCollision = function () {
+        // Bounce back from wall
+        this.moveDirection = this.moveDirection * -1;
+        this.moveTo();
+        this.moveDirection = this.moveDirection * -1;
+    };
+    UnitMoveState.prototype.turnTo = function () {
+        var angle;
+        if (this.moveDirection === unit_1.MoveDirections.Up)
+            angle = 0;
+        if (this.moveDirection === unit_1.MoveDirections.Down) {
+            angle = -180;
+            //if (this.moveDirection === MoveDirections.Right) angle = 180;     
+        }
+        if (this.moveDirection === unit_1.MoveDirections.Left)
+            angle = -90;
+        if (this.moveDirection === unit_1.MoveDirections.Right)
+            angle = 90;
+        gsap_1.default.to(this.unit.skin, { angle: angle, duration: 0.3 });
+        this.unit.lookDirection = this.moveDirection;
+    };
+    UnitMoveState.prototype.moveTo = function () {
+        if (this.moveDirection === unit_1.MoveDirections.Up)
+            this.unit.y -= this.speed;
+        if (this.moveDirection === unit_1.MoveDirections.Down)
+            this.unit.y += this.speed;
+        if (this.moveDirection === unit_1.MoveDirections.Left)
+            this.unit.x -= this.speed;
+        if (this.moveDirection === unit_1.MoveDirections.Right)
+            this.unit.x += this.speed;
+    };
+    return UnitMoveState;
+}(unit_state_1.UnitState));
+exports.UnitMoveState = UnitMoveState;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var FSM = /** @class */ (function () {
+    function FSM(states) {
+        this.state = null;
+        this.states = states;
+        //this.initialState = Object.keys(states)[0]; // Take the first state as initial   
+    }
+    FSM.prototype.step = function () {
+        if (this.state === null) {
+            this.state = Object.keys(this.states)[0]; // Take the first state as initial   
+            this.states[this.state].enter();
+            console.log('aaa');
+        }
+        this.states[this.state].execute();
+    };
+    FSM.prototype.transition = function (state) {
+        this.state = state;
+        this.states[this.state].enter();
+    };
+    return FSM;
+}());
+exports.FSM = FSM;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(1);
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__8__;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var map_1 = __webpack_require__(10);
+var utils_1 = __webpack_require__(2);
+var unit_1 = __webpack_require__(0);
 var enemy_1 = __webpack_require__(13);
-var bullet_1 = __webpack_require__(14);
+var bullet_1 = __webpack_require__(16);
+var Index_1 = __webpack_require__(1);
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
-    function GameScene(app, resources) {
+    function GameScene() {
         var _this = _super.call(this) || this;
         _this.units = [];
         _this.bullets = [];
-        _this.init(app, resources);
+        _this.init();
         return _this;
     }
-    GameScene.prototype.init = function (app, resources) {
-        var _this = this;
-        this.map = new map_1.Map(resources["wall"].texture);
+    GameScene.prototype.init = function () {
+        this.createMap();
+        this.createPlayer();
+        this.createEnemy();
+        this.startEnemiesGenerator();
+    };
+    GameScene.prototype.createMap = function () {
+        this.map = new map_1.Map(Index_1.GameManager.getInstance().resources["wall"].texture);
         this.map.x = 0;
         this.map.y = 0;
         this.addChild(this.map);
-        this.player = new unit_1.Unit(unit_1.UnitTypes.Player, resources["tank"].texture);
-        this.player.x = this.map.width / 2;
-        this.player.y = this.map.height / 2;
-        this.player.isHitTheWall = function () { return _this.map.checkCollisionUnitVsWall(_this.player); };
-        this.player.isHitTheUnit = function () { return _this.checkCollisionUnitVsUnit(_this.player); };
-        this.player.shoot = function () { return _this.createBullet(_this.player, resources["bullet"].texture); };
-        this.units.push(this.player);
-        this.addChild(this.player);
+    };
+    GameScene.prototype.startEnemiesGenerator = function () {
+        var _this = this;
+        //Todo need to clear interval on scene exit
         setInterval(function () {
-            var enemy = new enemy_1.Enemy(unit_1.UnitTypes.Enemy, resources["enemy"].texture);
-            var spawnPoint = _this.map.getRandomSpawnPoint();
-            enemy.x = spawnPoint.x;
-            enemy.y = spawnPoint.y;
-            enemy.isHitTheWall = function () { return _this.map.checkCollisionUnitVsWall(enemy); };
-            enemy.isHitTheUnit = function () { return _this.checkCollisionUnitVsUnit(enemy); };
-            enemy.shoot = function () { return _this.createBullet(enemy, resources["bullet"].texture); };
-            _this.units.push(enemy);
-            _this.addChild(enemy);
+            _this.createEnemy();
         }, 5000);
     };
-    GameScene.prototype.update = function () {
-        this.player.update();
-        this.units.forEach(function (unit) {
-            if (unit.type === unit_1.UnitTypes.Enemy)
-                unit.update();
-        });
-        // this.bullets.forEach(bullet => {
-        //     bullet.update();
-        // });
-        //this.checkCollisionUnitsVsWalls();
-        // this.checkCollisionUnitsVsUnits();
-        // this.checkCollisionUnitsVsBullets();
+    GameScene.prototype.createPlayer = function () {
+        var unit = new unit_1.Unit(unit_1.UnitTypes.Player, Index_1.GameManager.getInstance().resources["tank"].texture);
+        unit.x = this.map.width / 2;
+        unit.y = this.map.height / 2;
+        this.finishUnitCreation(unit);
     };
-    GameScene.prototype.createBullet = function (unit, texture) {
-        var bullet = new bullet_1.Bullet(unit, texture);
-        bullet.x = unit.x;
-        bullet.y = unit.y;
+    GameScene.prototype.createEnemy = function () {
+        var unit = new enemy_1.Enemy(unit_1.UnitTypes.Enemy, Index_1.GameManager.getInstance().resources["enemy"].texture);
+        var spawnPoint = this.map.getRandomSpawnPoint();
+        unit.x = spawnPoint.x;
+        unit.y = spawnPoint.y;
+        this.finishUnitCreation(unit);
+    };
+    GameScene.prototype.finishUnitCreation = function (unit) {
+        var _this = this;
+        unit.isHitTheWall = function () { return _this.map.checkCollisionUnitVsWall(unit); };
+        unit.isHitTheUnit = function () { return _this.checkCollisionUnitVsUnit(unit); };
+        unit.shoot = function () { return _this.createBullet(unit); };
+        this.units.push(unit);
+        this.addChild(unit);
+    };
+    GameScene.prototype.update = function () {
+        this.units.forEach(function (unit) { return unit.update(); });
+        this.bullets.forEach(function (bullet) { return bullet.update(); });
+        //this.checkCollisionUnitsVsWalls();
+        //this.checkCollisionUnitsVsUnits();
+        //this.checkCollisionUnitsVsBullets();
+    };
+    GameScene.prototype.createBullet = function (unit) {
+        var bullet = new bullet_1.Bullet(unit, Index_1.GameManager.getInstance().resources["bullet"].texture);
         this.bullets.push(bullet);
         this.addChild(bullet);
     };
@@ -417,7 +624,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         this.units.forEach(function (unit) {
             _this.bullets.forEach(function (bullet) {
-                if (bullet.owner === unit)
+                if (bullet.unit === unit)
                     return;
                 if (utils_1.Utils.checkForCollision(unit, bullet, 20)) {
                     _this.bullets = _this.bullets.filter(function (b) { return b !== bullet; });
@@ -437,7 +644,7 @@ exports.GameScene = GameScene;
 
 
 /***/ }),
-/* 6 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -456,8 +663,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_item_1 = __webpack_require__(7);
-var utils_1 = __webpack_require__(8);
+var map_item_1 = __webpack_require__(11);
+var utils_1 = __webpack_require__(2);
 var MapItemType;
 (function (MapItemType) {
     MapItemType[MapItemType["StoneWall"] = 1] = "StoneWall";
@@ -540,7 +747,7 @@ exports.Map = Map;
 
 
 /***/ }),
-/* 7 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -576,70 +783,7 @@ exports.MapItem = MapItem;
 
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Utils = /** @class */ (function () {
-    function Utils() {
-    }
-    Utils.randomInt = function (min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
-    };
-    ;
-    Utils.checkForCollision = function (a, b, size) {
-        return (Math.abs(a.x - b.x) <= size && Math.abs(a.y - b.y) <= size);
-    };
-    return Utils;
-}());
-exports.Utils = Utils;
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var unit_state_1 = __webpack_require__(4);
-var Index_1 = __webpack_require__(1);
-var UnitIdleState = /** @class */ (function (_super) {
-    __extends(UnitIdleState, _super);
-    function UnitIdleState() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    UnitIdleState.prototype.enter = function () {
-        this.unit.scale.set(1);
-    };
-    UnitIdleState.prototype.execute = function () {
-        var keys = Index_1.GameManager.getInstance().keys;
-        if (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight']) {
-            this.unit.fsm.transition('move');
-        }
-    };
-    return UnitIdleState;
-}(unit_state_1.UnitState));
-exports.UnitIdleState = UnitIdleState;
-
-
-/***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -655,141 +799,6 @@ var State = /** @class */ (function () {
     return State;
 }());
 exports.State = State;
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var unit_state_1 = __webpack_require__(4);
-var unit_1 = __webpack_require__(3);
-var gsap_1 = __importDefault(__webpack_require__(15));
-var Index_1 = __webpack_require__(1);
-var UnitMoveState = /** @class */ (function (_super) {
-    __extends(UnitMoveState, _super);
-    function UnitMoveState() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.moveDirection = unit_1.MoveDirections.Down;
-        _this.speed = 2;
-        return _this;
-    }
-    UnitMoveState.prototype.enter = function () {
-        this.unit.scale.set(0.95);
-    };
-    UnitMoveState.prototype.execute = function () {
-        var keys = Index_1.GameManager.getInstance().keys;
-        if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
-            this.unit.fsm.transition('idle');
-        }
-        if (keys['ArrowUp'])
-            this.moveDirection = unit_1.MoveDirections.Up;
-        if (keys['ArrowDown'])
-            this.moveDirection = unit_1.MoveDirections.Down;
-        if (keys['ArrowLeft'])
-            this.moveDirection = unit_1.MoveDirections.Left;
-        if (keys['ArrowRight'])
-            this.moveDirection = unit_1.MoveDirections.Right;
-        this.move();
-    };
-    UnitMoveState.prototype.move = function () {
-        this.turnTo();
-        this.moveTo();
-        if (this.unit.isHitTheWall())
-            this.handleWallCollision();
-        if (this.unit.isHitTheUnit())
-            this.handleUnitCollision();
-    };
-    UnitMoveState.prototype.handleWallCollision = function () {
-        // Bounce back from wall
-        this.moveDirection = this.moveDirection * -1;
-        this.moveTo();
-        this.moveDirection = this.moveDirection * -1;
-    };
-    UnitMoveState.prototype.handleUnitCollision = function () {
-        // Bounce back from wall
-        this.moveDirection = this.moveDirection * -1;
-        this.moveTo();
-        this.moveDirection = this.moveDirection * -1;
-    };
-    UnitMoveState.prototype.turnTo = function () {
-        var angle;
-        if (this.moveDirection === unit_1.MoveDirections.Up)
-            angle = 0;
-        if (this.moveDirection === unit_1.MoveDirections.Down) {
-            angle = -180;
-            //if (this.moveDirection === MoveDirections.Right) angle = 180;     
-        }
-        if (this.moveDirection === unit_1.MoveDirections.Left)
-            angle = -90;
-        if (this.moveDirection === unit_1.MoveDirections.Right)
-            angle = 90;
-        gsap_1.default.to(this.unit.skin, { angle: angle, duration: 0.3 });
-    };
-    UnitMoveState.prototype.moveTo = function () {
-        if (this.moveDirection === unit_1.MoveDirections.Up)
-            this.unit.y -= this.speed;
-        if (this.moveDirection === unit_1.MoveDirections.Down)
-            this.unit.y += this.speed;
-        if (this.moveDirection === unit_1.MoveDirections.Left)
-            this.unit.x -= this.speed;
-        if (this.moveDirection === unit_1.MoveDirections.Right)
-            this.unit.x += this.speed;
-    };
-    return UnitMoveState;
-}(unit_state_1.UnitState));
-exports.UnitMoveState = UnitMoveState;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var FSM = /** @class */ (function () {
-    function FSM(initialState, states) {
-        this.state = null;
-        this.states = states;
-        this.initialState = initialState;
-        // State instances get access to the state machine via this.stateMachine.
-        // for (const state of Object.values(this.possibleStates)) {
-        // state.stateMachine = this;
-        // }
-    }
-    FSM.prototype.step = function () {
-        if (this.state === null) {
-            this.state = this.initialState;
-            this.states[this.state].enter();
-        }
-        this.states[this.state].execute();
-    };
-    FSM.prototype.transition = function (state) {
-        this.state = state;
-        this.states[this.state].enter();
-    };
-    return FSM;
-}());
-exports.FSM = FSM;
 
 
 /***/ }),
@@ -812,18 +821,17 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var unit_1 = __webpack_require__(3);
-// import { EnemyMovingState } from "./enemy-moving-state";
-var unit_idle_state_1 = __webpack_require__(9);
-var fsm_1 = __webpack_require__(12);
-var enemy_moving_state_1 = __webpack_require__(16);
+var unit_1 = __webpack_require__(0);
+var fsm_1 = __webpack_require__(6);
+var enemy_idle_state_1 = __webpack_require__(14);
+var enemy_move_state_1 = __webpack_require__(15);
 var Enemy = /** @class */ (function (_super) {
     __extends(Enemy, _super);
     function Enemy(type, texture) {
         var _this = _super.call(this, type, texture) || this;
-        _this.fsm = new fsm_1.FSM('idle', {
-            idle: new unit_idle_state_1.UnitIdleState(_this),
-            move: new enemy_moving_state_1.EnemyMoveState(_this)
+        _this.fsm = new fsm_1.FSM({
+            idle: new enemy_idle_state_1.EnemyIdleState(_this),
+            move: new enemy_move_state_1.EnemyMoveState(_this)
         });
         return _this;
     }
@@ -852,8 +860,145 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var unit_idle_state_1 = __webpack_require__(3);
+var EnemyIdleState = /** @class */ (function (_super) {
+    __extends(EnemyIdleState, _super);
+    function EnemyIdleState() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    EnemyIdleState.prototype.execute = function () {
+        this.unit.fsm.transition('move');
+    };
+    return EnemyIdleState;
+}(unit_idle_state_1.UnitIdleState));
+exports.EnemyIdleState = EnemyIdleState;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var unit_1 = __webpack_require__(0);
+var utils_1 = __webpack_require__(2);
+var unit_move_state_1 = __webpack_require__(5);
+var EnemyMoveState = /** @class */ (function (_super) {
+    __extends(EnemyMoveState, _super);
+    function EnemyMoveState() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.speed = 2;
+        _this.hitsByDirection = [
+            { direction: unit_1.MoveDirections.Up, hits: 0 },
+            { direction: unit_1.MoveDirections.Down, hits: 0 },
+            { direction: unit_1.MoveDirections.Left, hits: 0 },
+            { direction: unit_1.MoveDirections.Right, hits: 0 },
+        ];
+        return _this;
+    }
+    EnemyMoveState.prototype.enter = function () {
+        _super.prototype.enter.call(this);
+        // setInterval(() => {
+        //     this.changeDirectionToRandom();
+        // }, 3000);
+    };
+    EnemyMoveState.prototype.execute = function () {
+        //console.log(this.hitsByDirection);
+        this.move();
+    };
+    EnemyMoveState.prototype.updateHitsByDirection = function () {
+        var _this = this;
+        this.hitsByDirection.map(function (item) {
+            if (item.direction === _this.moveDirection)
+                item.hits++;
+            return item;
+        });
+    };
+    EnemyMoveState.prototype.handleWallCollision = function () {
+        this.updateHitsByDirection();
+        _super.prototype.handleWallCollision.call(this);
+        this.changeDirectionToOpposite();
+    };
+    EnemyMoveState.prototype.handleUnitCollision = function () {
+        this.updateHitsByDirection();
+        _super.prototype.handleUnitCollision.call(this);
+        this.changeDirectionToOpposite();
+    };
+    EnemyMoveState.prototype.changeDirectionToOpposite = function () {
+        this.hitsByDirection.sort(function (a, b) { return a.hits - b.hits; });
+        if (this.hitsByDirection[this.hitsByDirection.length - 1].hits > 2) {
+            this.moveDirection = this.hitsByDirection[0].direction;
+            this.hitsByDirection = this.hitsByDirection.map(function (item) { return (__assign(__assign({}, item), { hits: 0 })); });
+        }
+        else {
+            this.moveDirection = this.moveDirection * -1;
+        }
+        console.log(this.hitsByDirection);
+        //this.moveDirection = this.moveDirection * -1;
+    };
+    EnemyMoveState.prototype.changeDirectionToRandom = function () {
+        var key = utils_1.Utils.randomInt(0, 3);
+        if (key === 0)
+            this.moveDirection = unit_1.MoveDirections.Up;
+        if (key === 1)
+            this.moveDirection = unit_1.MoveDirections.Down;
+        if (key === 2)
+            this.moveDirection = unit_1.MoveDirections.Left;
+        if (key === 3)
+            this.moveDirection = unit_1.MoveDirections.Right;
+    };
+    return EnemyMoveState;
+}(unit_move_state_1.UnitMoveState));
+exports.EnemyMoveState = EnemyMoveState;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 //import { UnitMovingState } from "./unit-move-state";
-var unit_1 = __webpack_require__(3);
+var unit_1 = __webpack_require__(0);
 var Bullet = /** @class */ (function (_super) {
     __extends(Bullet, _super);
     function Bullet(unit, texture) {
@@ -863,16 +1008,18 @@ var Bullet = /** @class */ (function (_super) {
             width: 5,
             height: 5
         };
-        _this.owner = unit;
-        //this.moveDirection = this.owner.states.moving.moveDirection;
+        _this.unit = unit;
+        _this.moveDirection = unit.lookDirection;
         _this.initView(texture);
         return _this;
     }
     Bullet.prototype.initView = function (texture) {
         this.skin = new PIXI.Sprite(texture);
         this.skin.anchor.set(0.5);
+        this.skin.scale.set(0.5);
         this.addChild(this.skin);
         this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1);
+        this.unit.setBulletInitialPosition(this);
     };
     Bullet.prototype.handleWallCollision = function () {
     };
@@ -894,7 +1041,7 @@ exports.Bullet = Bullet;
 
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6107,74 +6254,6 @@ gsap.registerPlugin(CSSPlugin);
 var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap,
     // to protect from tree shaking
 TweenMaxWithCSS = gsapWithCSS.core.Tween;
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var unit_1 = __webpack_require__(3);
-var utils_1 = __webpack_require__(8);
-var unit_move_state_1 = __webpack_require__(11);
-var EnemyMoveState = /** @class */ (function (_super) {
-    __extends(EnemyMoveState, _super);
-    function EnemyMoveState() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.speed = 2;
-        return _this;
-        // public update(): void {
-        // }
-    }
-    EnemyMoveState.prototype.execute = function () {
-        this.move();
-    };
-    // public onEnter(): void {
-    //     super.onEnter();
-    //     setInterval(() => {
-    //         this.changeDirectionToRandom();
-    //     }, 3000);
-    // }
-    EnemyMoveState.prototype.handleWallCollision = function () {
-        _super.prototype.handleWallCollision.call(this);
-        this.changeDirectionToOpposite();
-    };
-    EnemyMoveState.prototype.handleUnitCollision = function () {
-        _super.prototype.handleUnitCollision.call(this);
-        this.changeDirectionToOpposite();
-    };
-    EnemyMoveState.prototype.changeDirectionToOpposite = function () {
-        this.moveDirection = this.moveDirection * -1;
-    };
-    EnemyMoveState.prototype.changeDirectionToRandom = function () {
-        var key = utils_1.Utils.randomInt(0, 3);
-        if (key === 0)
-            this.moveDirection = unit_1.MoveDirections.Up;
-        if (key === 1)
-            this.moveDirection = unit_1.MoveDirections.Down;
-        if (key === 2)
-            this.moveDirection = unit_1.MoveDirections.Left;
-        if (key === 3)
-            this.moveDirection = unit_1.MoveDirections.Right;
-    };
-    return EnemyMoveState;
-}(unit_move_state_1.UnitMoveState));
-exports.EnemyMoveState = EnemyMoveState;
 
 
 /***/ })

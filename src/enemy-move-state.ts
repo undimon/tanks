@@ -22,6 +22,7 @@ export class EnemyMoveState extends UnitMoveState {
     }
 
     public execute(): void {
+        //super.execute();
         //console.log(this.hitsByDirection);
         
         this.move();
@@ -57,7 +58,7 @@ export class EnemyMoveState extends UnitMoveState {
             this.moveDirection = this.moveDirection * -1;
         }
         
-        console.log(this.hitsByDirection);
+        //console.log(this.hitsByDirection);
        
         //this.moveDirection = this.moveDirection * -1;
     }

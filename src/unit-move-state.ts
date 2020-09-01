@@ -12,6 +12,7 @@ export class UnitMoveState extends UnitState {
     }
 
     public execute(): void {
+        super.execute();
         const keys = GameManager.getInstance().keys;
         if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
             this.unit.fsm.transition('idle');
@@ -22,7 +23,7 @@ export class UnitMoveState extends UnitState {
         if (keys['ArrowDown']) this.moveDirection = MoveDirections.Down;
         if (keys['ArrowLeft']) this.moveDirection = MoveDirections.Left;
         if (keys['ArrowRight']) this.moveDirection = MoveDirections.Right;
-
+        
         this.move();
     }
 
@@ -34,14 +35,14 @@ export class UnitMoveState extends UnitState {
     }
 
     public handleWallCollision(): void {
-        // Bounce back from wall
+        // Bounce back
         this.moveDirection = this.moveDirection * -1;
         this.moveTo();
         this.moveDirection = this.moveDirection * -1;
     }
 
     public handleUnitCollision(): void {
-        // Bounce back from wall
+        // Bounce back
         this.moveDirection = this.moveDirection * -1;
         this.moveTo();
         this.moveDirection = this.moveDirection * -1;
@@ -49,12 +50,14 @@ export class UnitMoveState extends UnitState {
 
     public turnTo(): void {
         let angle: number;
-        if (this.moveDirection === MoveDirections.Up) angle = 0;    
-        if (this.moveDirection === MoveDirections.Down) {
-            angle = -180;
-            //if (this.moveDirection === MoveDirections.Right) angle = 180;     
-        }
-        if (this.moveDirection === MoveDirections.Left) angle = -90;   
+        if (this.moveDirection === MoveDirections.Up) {
+            angle = 0;
+            if (this.unit.lookDirection === MoveDirections.Left) {
+                angle = 300;
+            }     
+        }    
+        if (this.moveDirection === MoveDirections.Down) angle = 180;
+        if (this.moveDirection === MoveDirections.Left) angle = 270;   
         if (this.moveDirection === MoveDirections.Right) angle = 90;   
         gsap.to(this.unit.skin, { angle, duration: 0.3 });
 

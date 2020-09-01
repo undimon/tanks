@@ -12,5 +12,7 @@ export class UnitIdleState extends UnitState {
         if (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight']) {
             this.unit.fsm.transition('move');
         }
+
+
     }
 }

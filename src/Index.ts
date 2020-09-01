@@ -69,12 +69,13 @@ export class GameManager {
     }
 
     private static handleKeyDown(event: KeyboardEvent): void {
-        GameManager.instance.keys = {};
+        //GameManager.instance.keys = {};
         GameManager.instance.keys[event.code] = true;
     }
 
-    private static  handleKeyUp(event: KeyboardEvent): void {
-        GameManager.instance.keys = {};
+    private static handleKeyUp(event: KeyboardEvent): void {
+        //GameManager.instance.keys = {};
+        GameManager.instance.keys[event.code] = false;
     }
 
     // Resize function window

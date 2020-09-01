@@ -114,9 +114,6 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var unit_idle_state_1 = __webpack_require__(3);
-var unit_move_state_1 = __webpack_require__(5);
-var fsm_1 = __webpack_require__(6);
 var UnitTypes;
 (function (UnitTypes) {
     UnitTypes[UnitTypes["Player"] = 0] = "Player";
@@ -131,30 +128,21 @@ var MoveDirections;
 })(MoveDirections = exports.MoveDirections || (exports.MoveDirections = {}));
 var Unit = /** @class */ (function (_super) {
     __extends(Unit, _super);
-    function Unit(type, texture) {
+    function Unit(texture) {
         var _this = _super.call(this) || this;
         _this.virtualSize = {
             width: 36,
             height: 36
         };
         _this.lookDirection = MoveDirections.Up;
-        _this.type = type;
         _this.initView(texture);
-        _this.fsm = new fsm_1.FSM({
-            idle: new unit_idle_state_1.UnitIdleState(_this),
-            move: new unit_move_state_1.UnitMoveState(_this)
-        });
         return _this;
     }
     Unit.prototype.initView = function (texture) {
-        var _this = this;
         this.skin = new PIXI.Sprite(texture);
         this.skin.anchor.set(0.5);
         this.addChild(this.skin);
         this.pivot.set(this.virtualSize.width / 2 * -1, this.virtualSize.height / 2 * -1);
-        setInterval(function () {
-            _this.shoot();
-        }, 3000);
     };
     Unit.prototype.setBulletInitialPosition = function (bullet) {
         bullet.x = this.x + this.virtualSize.width / 2;
@@ -251,11 +239,12 @@ var GameManager = /** @class */ (function () {
         //this.app.renderer.resize(500, 500);
     };
     GameManager.handleKeyDown = function (event) {
-        GameManager.instance.keys = {};
+        //GameManager.instance.keys = {};
         GameManager.instance.keys[event.code] = true;
     };
     GameManager.handleKeyUp = function (event) {
-        GameManager.instance.keys = {};
+        //GameManager.instance.keys = {};
+        GameManager.instance.keys[event.code] = false;
     };
     // Resize function window
     GameManager.prototype.resize = function () {
@@ -415,6 +404,7 @@ var UnitMoveState = /** @class */ (function (_super) {
         this.unit.scale.set(0.95);
     };
     UnitMoveState.prototype.execute = function () {
+        _super.prototype.execute.call(this);
         var keys = Index_1.GameManager.getInstance().keys;
         if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
             this.unit.fsm.transition('idle');
@@ -439,27 +429,29 @@ var UnitMoveState = /** @class */ (function (_super) {
             this.handleUnitCollision();
     };
     UnitMoveState.prototype.handleWallCollision = function () {
-        // Bounce back from wall
+        // Bounce back
         this.moveDirection = this.moveDirection * -1;
         this.moveTo();
         this.moveDirection = this.moveDirection * -1;
     };
     UnitMoveState.prototype.handleUnitCollision = function () {
-        // Bounce back from wall
+        // Bounce back
         this.moveDirection = this.moveDirection * -1;
         this.moveTo();
         this.moveDirection = this.moveDirection * -1;
     };
     UnitMoveState.prototype.turnTo = function () {
         var angle;
-        if (this.moveDirection === unit_1.MoveDirections.Up)
+        if (this.moveDirection === unit_1.MoveDirections.Up) {
             angle = 0;
-        if (this.moveDirection === unit_1.MoveDirections.Down) {
-            angle = -180;
-            //if (this.moveDirection === MoveDirections.Right) angle = 180;     
+            if (this.unit.lookDirection === unit_1.MoveDirections.Left) {
+                angle = 300;
+            }
         }
+        if (this.moveDirection === unit_1.MoveDirections.Down)
+            angle = 180;
         if (this.moveDirection === unit_1.MoveDirections.Left)
-            angle = -90;
+            angle = 270;
         if (this.moveDirection === unit_1.MoveDirections.Right)
             angle = 90;
         gsap_1.default.to(this.unit.skin, { angle: angle, duration: 0.3 });
@@ -545,10 +537,10 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_1 = __webpack_require__(10);
 var utils_1 = __webpack_require__(2);
-var unit_1 = __webpack_require__(0);
 var enemy_1 = __webpack_require__(13);
 var bullet_1 = __webpack_require__(16);
 var Index_1 = __webpack_require__(1);
+var player_1 = __webpack_require__(18);
 var GameScene = /** @class */ (function (_super) {
     __extends(GameScene, _super);
     function GameScene() {
@@ -578,13 +570,13 @@ var GameScene = /** @class */ (function (_super) {
         }, 5000);
     };
     GameScene.prototype.createPlayer = function () {
-        var unit = new unit_1.Unit(unit_1.UnitTypes.Player, Index_1.GameManager.getInstance().resources["tank"].texture);
+        var unit = new player_1.Player(Index_1.GameManager.getInstance().resources["tank"].texture);
         unit.x = this.map.width / 2;
         unit.y = this.map.height / 2;
         this.finishUnitCreation(unit);
     };
     GameScene.prototype.createEnemy = function () {
-        var unit = new enemy_1.Enemy(unit_1.UnitTypes.Enemy, Index_1.GameManager.getInstance().resources["enemy"].texture);
+        var unit = new enemy_1.Enemy(Index_1.GameManager.getInstance().resources["enemy"].texture);
         var spawnPoint = this.map.getRandomSpawnPoint();
         unit.x = spawnPoint.x;
         unit.y = spawnPoint.y;
@@ -594,6 +586,7 @@ var GameScene = /** @class */ (function (_super) {
         var _this = this;
         unit.isHitTheWall = function () { return _this.map.checkCollisionUnitVsWall(unit); };
         unit.isHitTheUnit = function () { return _this.checkCollisionUnitVsUnit(unit); };
+        unit.isHitTheBullet = function () { return _this.checkCollisionUnitVsBullet(unit); };
         unit.shoot = function () { return _this.createBullet(unit); };
         this.units.push(unit);
         this.addChild(unit);
@@ -620,23 +613,24 @@ var GameScene = /** @class */ (function (_super) {
         });
         return hasCollision;
     };
-    GameScene.prototype.checkCollisionUnitsVsBullets = function () {
+    GameScene.prototype.checkCollisionUnitVsBullet = function (unit) {
         var _this = this;
-        this.units.forEach(function (unit) {
-            _this.bullets.forEach(function (bullet) {
-                if (bullet.unit === unit)
-                    return;
-                if (utils_1.Utils.checkForCollision(unit, bullet, 20)) {
-                    _this.bullets = _this.bullets.filter(function (b) { return b !== bullet; });
-                    _this.removeChild(bullet);
-                    _this.units = _this.units.filter(function (u) { return u !== u; });
-                    _this.removeChild(unit);
-                    unit.handleBulletCollision();
-                    //unit.visible = false;
-                    //bullet.handleCollision();
-                }
-            });
+        var hasCollision = false;
+        this.bullets.forEach(function (bullet) {
+            if (bullet.unit === unit)
+                return;
+            if (utils_1.Utils.checkForCollision(unit, bullet, 20)) {
+                hasCollision = true;
+                _this.bullets = _this.bullets.filter(function (b) { return b !== bullet; });
+                _this.removeChild(bullet);
+                _this.units = _this.units.filter(function (u) { return u !== unit; });
+                _this.removeChild(unit);
+                //unit.handleBulletCollision();
+                //unit.visible = false;
+                //bullet.handleCollision();
+            }
         });
+        return hasCollision;
     };
     return GameScene;
 }(PIXI.Container));
@@ -827,14 +821,25 @@ var enemy_idle_state_1 = __webpack_require__(14);
 var enemy_move_state_1 = __webpack_require__(15);
 var Enemy = /** @class */ (function (_super) {
     __extends(Enemy, _super);
-    function Enemy(type, texture) {
-        var _this = _super.call(this, type, texture) || this;
+    function Enemy(texture) {
+        var _this = _super.call(this, texture) || this;
+        _this.type = unit_1.UnitTypes.Enemy;
         _this.fsm = new fsm_1.FSM({
             idle: new enemy_idle_state_1.EnemyIdleState(_this),
             move: new enemy_move_state_1.EnemyMoveState(_this)
         });
+        _this.shootingInterval = setInterval(function () {
+            _this.shoot();
+        }, 3000);
         return _this;
     }
+    Enemy.prototype.update = function () {
+        _super.prototype.update.call(this);
+        if (this.isHitTheBullet()) {
+            console.log('enemy died');
+            clearInterval(this.shootingInterval);
+        }
+    };
     return Enemy;
 }(unit_1.Unit));
 exports.Enemy = Enemy;
@@ -928,6 +933,7 @@ var EnemyMoveState = /** @class */ (function (_super) {
         // }, 3000);
     };
     EnemyMoveState.prototype.execute = function () {
+        //super.execute();
         //console.log(this.hitsByDirection);
         this.move();
     };
@@ -958,7 +964,7 @@ var EnemyMoveState = /** @class */ (function (_super) {
         else {
             this.moveDirection = this.moveDirection * -1;
         }
-        console.log(this.hitsByDirection);
+        //console.log(this.hitsByDirection);
         //this.moveDirection = this.moveDirection * -1;
     };
     EnemyMoveState.prototype.changeDirectionToRandom = function () {
@@ -6254,6 +6260,60 @@ gsap.registerPlugin(CSSPlugin);
 var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap,
     // to protect from tree shaking
 TweenMaxWithCSS = gsapWithCSS.core.Tween;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var unit_idle_state_1 = __webpack_require__(3);
+var unit_move_state_1 = __webpack_require__(5);
+var fsm_1 = __webpack_require__(6);
+var unit_1 = __webpack_require__(0);
+var Index_1 = __webpack_require__(1);
+var Player = /** @class */ (function (_super) {
+    __extends(Player, _super);
+    function Player(texture) {
+        var _this = _super.call(this, texture) || this;
+        _this.type = unit_1.UnitTypes.Player;
+        _this.fsm = new fsm_1.FSM({
+            idle: new unit_idle_state_1.UnitIdleState(_this),
+            move: new unit_move_state_1.UnitMoveState(_this)
+        });
+        return _this;
+    }
+    Player.prototype.update = function () {
+        _super.prototype.update.call(this);
+        if (this.isHitTheBullet()) {
+            console.log('player died');
+        }
+        var keys = Index_1.GameManager.getInstance().keys;
+        //console.log(keys);
+        if (keys['Space']) {
+            this.shoot();
+            //this.unit.fsm.transition('idle');
+            return;
+        }
+    };
+    return Player;
+}(unit_1.Unit));
+exports.Player = Player;
 
 
 /***/ })

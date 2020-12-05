@@ -21,6 +21,7 @@ module.exports = {
 		[FILE_NAME]: [PATHS.entryPoint],
 		[FILE_NAME + '.min']: [PATHS.entryPoint]
 	},
+	devtool: 'inline-source-map',
 	output: {
 		path: PATHS.dist,
 		filename: '[name].js',

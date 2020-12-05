@@ -1,6 +1,6 @@
 import { UnitState } from "./unit-state";
 import { Unit, UnitTypes } from "./unit";
-import { FSM } from "./fsm";
+import { FSM } from "./framework/core/fsm/fsm";
 import { EnemyIdleState } from "./enemy-idle-state";
 import { EnemyMoveState } from "./enemy-move-state";
 

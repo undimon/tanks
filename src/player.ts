@@ -2,10 +2,10 @@ import { UnitState } from "./unit-state";
 import { UnitIdleState } from "./unit-idle-state";
 import { Map } from "./map";
 import { UnitMoveState } from "./unit-move-state";
-import { FSM } from "./fsm";
+import { FSM } from "./framework/core/fsm/fsm";
 import { Bullet } from "./bullet";
 import { UnitTypes, Unit } from "./unit";
-import { GameManager } from "./Index";
+import { AppManager } from "./framework/core/app-manager";
 
 export class Player extends Unit {
 
@@ -25,7 +25,7 @@ export class Player extends Unit {
             console.log('player died');
         }
 
-        const keys = GameManager.getInstance().keys;
+        const keys = AppManager.getInstance().keys;
         //console.log(keys);
         
         if (keys['Space']) {

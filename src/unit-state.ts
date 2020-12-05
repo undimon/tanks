@@ -1,5 +1,5 @@
 import { Unit, MoveDirections } from "./unit";
-import { State } from "./state";
+import { State } from "./framework/core/fsm/state";
 
 export class UnitState extends State {
     public unit: Unit;

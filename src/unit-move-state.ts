@@ -1,7 +1,7 @@
 import { UnitState } from "./unit-state";
 import { MoveDirections } from "./unit";
 import gsap from "gsap"; 
-import { GameManager } from "./Index";
+import { AppManager } from "./framework/core/app-manager";
 
 export class UnitMoveState extends UnitState {
     public moveDirection: MoveDirections = MoveDirections.Down;
@@ -13,7 +13,7 @@ export class UnitMoveState extends UnitState {
 
     public execute(): void {
         super.execute();
-        const keys = GameManager.getInstance().keys;
+        const keys = AppManager.getInstance().keys;
         if (!(keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])) {
             this.unit.fsm.transition('idle');
             return;

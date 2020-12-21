@@ -1,15 +1,18 @@
 import gsap from "gsap";
-import { Container } from "pixi.js";
+import { Container, Texture } from "pixi.js";
 import { AppManager } from "../app-manager";
+import { Controller } from './controller';
 import { MVCEntity } from "./mvc-entity";
 
-export class View {
+export class View extends MVCEntity {
+	public controller: Controller;
     public display: Container = new Container();
 
     /**
 	 * Called when object is created
 	 */
 	public onRegister(): void {	
+		super.onRegister();
 		this.display.visible = false;
     }
     
@@ -36,7 +39,11 @@ export class View {
 		});
 	}
 
-	public getTexture(name: string): PIXI.Texture {
+	public getTexture(name: string): Texture {
 		return AppManager.getInstance().getTexture(name);
 	}
+    
+    public getSpriteTextures(spriteName: string, framesCount: number, frameWidth: number, frameHeight: number): Texture[] {
+        return AppManager.getInstance().getSpriteTextures(spriteName, framesCount, frameWidth, frameHeight);
+	}	
 }

@@ -1,10 +1,9 @@
 import { Controller } from './controller';
-import { MVCEntity } from './mvc-entity';
 import { Model } from './model';
 import { View } from './view';
 import { AppManager } from '../app-manager';
-import { FSM } from '../fsm/fsm';
 import { GlobalNotifications } from '../global-notifications';
+import { Container } from 'pixi.js';
 
 export class Mvc {
     private static instance: Mvc;
@@ -83,22 +82,35 @@ export class Mvc {
         });         
     }
 
-    public registerController(notificationName: string, controllerClass: typeof Controller, viewClass?: typeof View): void {
+    public createController(controllerClass: typeof Controller, viewClass?: typeof View, layer?: Container): Controller {
         let controller: Controller = new controllerClass();
         controller.onRegister();
         
         if (viewClass) {
             controller.view = new viewClass();
+            controller.view.controller = controller;
             controller.view.onRegister();
-            AppManager.getInstance().addLayerToScene(controller.view.display);
+            if (layer) {
+                layer.addChild(controller.view.display);    
+            }
+            else {
+                AppManager.getInstance().addLayerToScene(controller.view.display);
+            }
             controller.view.postRegister();
         }
 
+        controller.postRegister();
+        
+        return controller;        
+    }
+
+    public registerController(notificationName: string, controllerClass: typeof Controller, viewClass?: typeof View): void {
+        let controller: Controller = this.createController(controllerClass, viewClass);        
+ 
         this.controllers[notificationName] = controller;
         
         // Subscribe itself to notification
         controller.addNotification(notificationName, controller.execute.bind(controller));
-        controller.postRegister();
     }
 
     public registerModel(modelName: string, modelClass: typeof Model): void {

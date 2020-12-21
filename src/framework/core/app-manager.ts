@@ -1,7 +1,7 @@
 import { Container, Texture } from "pixi.js";
 
 export class AppManager {
-    private static instance: AppManager;
+    protected static instance: AppManager;
     
     public app: PIXI.Application;
     public resources: PIXI.LoaderResource;
@@ -9,7 +9,7 @@ export class AppManager {
     protected sceneWidth: number = 900;
     protected sceneHeight: number = 720;
 
-       public keys: any = {};
+    public keys: any = {};
 
     constructor() {
         if (AppManager.instance) {
@@ -60,57 +60,40 @@ export class AppManager {
         this.app = new PIXI.Application({ 
             width: this.sceneWidth, 
             height: this.sceneHeight, 
+            //resolution: window.devicePixelRatio,
             backgroundColor: 0xFFFFFF 
         });
         document.body.appendChild(this.app.view);
 
-        window.addEventListener('keydown', AppManager.handleKeyDown);
-        window.addEventListener('keyup', AppManager.handleKeyUp);
+        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+        window.addEventListener('keyup', this.handleKeyUp.bind(this));
     }
 
     public getTexture(name: string): Texture {
         return (this.resources[name] as PIXI.LoaderResource).texture;
     }
-
-    public swapScenes(): void {
-
-    }
     
-    // public init(): void {
-    //     window.addEventListener('resize', this.resize.bind(this));
-    //     this.resize();
-    // }
+    public getSpriteTextures(spriteName: string, framesCount: number, frameWidth: number, frameHeight: number): Texture[] {
+        const frames: PIXI.Texture[] = [];
+        const spriteSheet: PIXI.BaseTexture = new PIXI.BaseTexture((this.resources[spriteName] as PIXI.LoaderResource).url);
 
-    private onAssetsLoadingComplete(loader: PIXI.Loader, resources: PIXI.LoaderResource, onComplete: Function){
-        this.resources = resources;
-        onComplete();
-        
-        // this.gameScene = new GameScene();
-        // this.app.stage.addChild(this.gameScene);
-        // this.app.stage.scale.set(0.6, 0.6);
-
-        // window.addEventListener('keydown', AppManager.handleKeyDown);
-        // window.addEventListener('keyup', AppManager.handleKeyUp);
-
-        // this.app.ticker.add(() => {
-        //     this.gameScene.update();
-        // });  
-
-        //this.app.renderer.resize(500, 500);
+        for (let i = 0; i < framesCount; i++)
+        {
+            const texture: PIXI.Texture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(i * frameWidth, 0, frameWidth, frameHeight));
+            frames.push(texture);
+        }
+        return frames;        
     }
 
-    private static handleKeyDown(event: KeyboardEvent): void {
-        //GameManager.instance.keys = {};
-        AppManager.instance.keys[event.code] = true;
+    protected handleKeyDown(event: KeyboardEvent): void {
+        this.keys[event.code] = true;
     }
 
-    private static handleKeyUp(event: KeyboardEvent): void {
-        //GameManager.instance.keys = {};
-        AppManager.instance.keys[event.code] = false;
+    protected handleKeyUp(event: KeyboardEvent): void {
+        this.keys[event.code] = false;
     }
 
-    // Resize function window
-    private resize() {
+    protected resize() {
        // this.app.renderer.resize(window.innerWidth, window.innerHeight);
 
         //this.gecko.x = this.app.renderer.width / 2;

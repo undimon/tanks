@@ -11,9 +11,9 @@ export class MenuInitController extends Controller {
     public execute(notification: INotification): void {
         this.showMenu();
 
-        gsap.delayedCall(5, () => {
+        gsap.delayedCall(1, () => {
             // Transition to game scene
-            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, GameNotifications.INIT);
+            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, GameNotifications.SCENE);
         })
     }
 

@@ -1,3 +1,5 @@
+import { Container } from "pixi.js";
+import { GameObject } from "../../../game/modules/game-module/misc/game-object";
 import { Model } from "./model";
 import { MVCEntity } from "./mvc-entity";
 import { INotification } from "./notification";
@@ -54,10 +56,18 @@ export class Controller extends MVCEntity {
         });
     }
     
+	/**
+	 * Sends the notification to all subscribed entities
+	 */
+	public sendNotification(name: string, body?: any): void {
+		console.log('sendNotification: ', name, body);
+		this.mvc.sendNotification(name, body);
+    }
+        
     /**
      * Gets the model by name
      */    
-    public retrieveModel(modelName: string): any {
+    public retrieveModel(modelName: string): Model {
         return this.mvc.retrieveModel(modelName);
     } 
     
@@ -67,7 +77,7 @@ export class Controller extends MVCEntity {
 
 	public layerTransitionOutStart(): void {
         this.view.layerTransitionOutStart();
-	}    
+    }       
 }
 
 export interface INotificationHandler {

@@ -1,25 +1,33 @@
 import { State } from "./state";
 
 export class FSM {
-    private states: State[];
-    private currentState: string = null;
+    protected states: IStates;
+    protected currentStateId: number = null;
     
-    constructor(states: any) {
+    public registerStates(states: IStates) {
         this.states = states;
+
+        // Transition into the first state
+        const stateId: number = Number(Object.keys(this.states)[0]); // Take the first state as initial 
+        this.transition(stateId);
     }
 
     // Called in main update loop
     public step(): void {
-        if (this.currentState === null) {
-            this.currentState = Object.keys(this.states)[0]; // Take the first state as initial   
-            this.states[this.currentState].enter();
-        }
-        this.states[this.currentState].execute();
+        this.states[this.currentStateId].execute();
     }
 
     // Changes the state
-    public transition(newState: string): void {
-        this.currentState = newState;
-        this.states[this.currentState].enter();
+    public transition(nextStateId: number): void {
+        this.currentStateId = nextStateId;
+        this.states[this.currentStateId].enter();
     }
+
+    public get state(): State {
+        return this.states[this.currentStateId];
+    }
+}
+
+export interface IStates {
+    [stateName: number]: State
 }

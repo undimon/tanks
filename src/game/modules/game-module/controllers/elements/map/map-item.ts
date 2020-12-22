@@ -40,6 +40,18 @@ export class MapItem extends GameObject {
         if (type === GameObjectTypes.Eagle) {
             texture = 'eagle';
             this.initEagleExplosionAnimation();
+        }
+        if (type === GameObjectTypes.BonusSpeed) {
+            texture = 'bonusSpeed';
+        }  
+        if (type === GameObjectTypes.BonusSlow) {
+            texture = 'bonusSlow';
+        }  
+        if (type === GameObjectTypes.BonusLife) {
+            texture = 'bonusLife';
+        }  
+        if (type === GameObjectTypes.BonusImmortal) {
+            texture = 'bonusImmortal';
         }  
 
         this.skin = new Sprite(AppManager.getInstance().getTexture(Config.assets[texture]));   
@@ -66,13 +78,27 @@ export class MapItem extends GameObject {
 
     // Check collisions only with these types
     public checkCollisionWith(object: GameObject): void {
-        if (object.type !== GameObjectTypes.Bullet && object.type !== GameObjectTypes.Player && object.type !== GameObjectTypes.Enemy) return;
-        super.checkCollisionWith(object);
+        if (object.type === GameObjectTypes.Bullet || 
+            object.type === GameObjectTypes.Player || 
+            object.type === GameObjectTypes.Enemy) {
+            super.checkCollisionWith(object);
+        }
     }   
     
     public handleCollisionWith(object: GameObject): void {
-        if (object.type === GameObjectTypes.Bullet && (this.type === GameObjectTypes.BrickWall || this.type === GameObjectTypes.Eagle) ) {
-            this.destroy();
+        if (object.type === GameObjectTypes.Bullet) {
+            if (this.type === GameObjectTypes.BrickWall || this.type === GameObjectTypes.Eagle) {
+                this.destroy();
+            }   
+        }
+
+        if (object.type === GameObjectTypes.Player || object.type === GameObjectTypes.Enemy) {
+            if (this.type === GameObjectTypes.BonusImmortal || 
+                this.type === GameObjectTypes.BonusLife ||
+                this.type === GameObjectTypes.BonusSlow||
+                this.type === GameObjectTypes.BonusSpeed) {
+                this.destroy();
+            }
         }
     }
 

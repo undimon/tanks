@@ -1,18 +1,14 @@
 import { Module } from "../../../framework/core/module";
-import { MenuButtonsController } from "./controllers/menu-buttons-controller";
-import { MenuInitController } from "./controllers/menu-init-controller";
+import { MenuMainController } from "./controllers/menu-main-controller";
 import { MenuNotifications } from "./misc/menu-names";
-import { MenuButtonsView } from "./views/menu-buttons-view";
-import { MenuInitView } from "./views/menu-init-view";
+import { MenuMainView } from "./views/menu-main-view";
 
 export class MenuModule extends Module {
     public registerControllers(): void {
-        this.addController(MenuNotifications.INIT, MenuInitController, MenuInitView);
-        this.addController(MenuNotifications.BUTTONS, MenuButtonsController, MenuButtonsView);
+        this.addController(MenuNotifications.MAIN, MenuMainController, MenuMainView);
     }
 
     public registerScenes(): void {
-        //this.addScene(MenuNotifications.INIT, [ MenuNotifications.INIT ]);
-        this.addScene(MenuNotifications.INIT, [ MenuNotifications.INIT, MenuNotifications.BUTTONS ]);
+        this.addScene(MenuNotifications.SCENE, [ MenuNotifications.MAIN ]);
     }
 }

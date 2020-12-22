@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import { Graphics, ISize } from "pixi.js";
+import { Graphics, ISize, TilingSprite } from "pixi.js";
 import { Utils } from "../../../../../../utils";
 import { Config } from "../../../../misc/config";
 import { GameObject, MoveDirections } from "../../../misc/game-object";
@@ -23,7 +23,7 @@ export class UnitView extends GameObjectView {
     public init(object: GameObject): void {
         super.init(object);
         this.unit = object as Unit;	
-        	
+        
         this.initSkin();
         this.initExplosionAnimation();
         this.initSpawnAnimation();        
@@ -142,8 +142,15 @@ export class UnitView extends GameObjectView {
         };
     }
 
-    public setPosition(x: number, y: number): void {
-        this.display.x = x;
-        this.display.y = y;
-    }    
+    public playImmortalAnimation(totalDuration: number, onComplete: Function): void {
+        const duration: number = 0.2;
+        const repeat: number = totalDuration / duration;
+        gsap.fromTo(this.skin, { alpha: 0.6 }, { 
+            alpha: 1, 
+            duration,
+            yoyo: true, 
+            repeat, 
+            onComplete: () => onComplete() 
+        });
+    }
 }

@@ -1,3 +1,3 @@
 export class PreloaderNotifications {
-    public static INIT: string = "PRELOADER_INIT";
+    public static MAIN: string = "PRELOADER_MAIN";
 }

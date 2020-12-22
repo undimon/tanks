@@ -9,5 +9,8 @@ export enum GameObjectTypes {
     PlayerSpawnPoint,
     Water,
     Tree,
-    Bonus
+    BonusSpeed,
+    BonusSlow,
+    BonusLife,
+    BonusImmortal
 }

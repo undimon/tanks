@@ -1,7 +1,7 @@
 import { View } from "../../../../framework/core/mvc/view";
+import { Point, Text } from "pixi.js";
+import { UiComponents } from "../../misc/ui-components";
 import { AppManager } from "../../../../framework/core/app-manager";
-import { Container, Graphics, Sprite, Text } from "pixi.js";
-import { INotification } from '../../../../framework/core/mvc/notification';
 
 export class GameUiView extends View {
     
@@ -14,24 +14,24 @@ export class GameUiView extends View {
     }
  
     protected initLives(): void {
-        this.livesText = new Text('Lives: 0');
-        this.livesText.x = 750;
-        this.livesText.y = 20;
+        this.livesText = UiComponents.createText('', 0xffffff);
+        this.livesText.x = 20;
+        this.livesText.y = AppManager.getInstance().getSceneHeight() - 45;
         this.display.addChild(this.livesText);
     }
 
     public updateLives(count: number): void {
-        this.livesText.text = `Lives: ${count}`;
+        this.livesText.text = `LIFES: ${count}`;
     }
 
     protected initEnemies(): void {
-        this.enemiesText = new Text('Enemies: 0');
-        this.enemiesText.x = 750;
-        this.enemiesText.y = 50;
+        this.enemiesText = UiComponents.createText('', 0xffffff);
+        this.enemiesText.x = AppManager.getInstance().getSceneWidth() - 180;
+        this.enemiesText.y = AppManager.getInstance().getSceneHeight() - 45;
         this.display.addChild(this.enemiesText);
     }
 
     public updateEnemies(count: number): void {
-        this.enemiesText.text = `Enemies: ${count}`;
+        this.enemiesText.text = `ENEMIES: ${count}`;
     }
 }

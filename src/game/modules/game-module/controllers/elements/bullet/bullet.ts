@@ -14,23 +14,20 @@ export class Bullet extends GameObject {
         (this.view as BulletView).createBullet(params);
     }
     
-    public destroyBullet(): void {
+    public destroy(): void {
         this.canCollide = false;
         (this.view as BulletView).playExplosionAnimation(() => {
-            this.destroy();
+            super.destroy();
         })
     }
 
     public handleCollisionWith(object: GameObject): void {
         if (object.type === GameObjectTypes.BrickWall || object.type === GameObjectTypes.StoneWall || object.type === GameObjectTypes.Eagle) {
-            this.destroyBullet();
+            this.destroy();
         }
         if (object.type === GameObjectTypes.Bullet) {
-            this.destroyBullet();
-        }
-        if (object.type === GameObjectTypes.Enemy && this.owner.type === GameObjectTypes.Player) {
-            this.destroyBullet();
-        }        
+            this.destroy();
+        }      
     }
 
     public update(): void {

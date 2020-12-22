@@ -1,4 +1,4 @@
-import { Bullet, IBulletParams } from "../../views/elements/bullet/bullet";
+import { Bullet, IBulletParams } from "../elements/bullet/bullet";
 
 export class BulletsFactory {
     public onBulletCreate: Function;

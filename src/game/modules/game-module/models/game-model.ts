@@ -2,19 +2,27 @@ import { Point } from "pixi.js";
 import { Model } from "../../../../framework/core/mvc/model";
 import { Utils } from "../../../../utils";
 import { GameObjectTypes } from "../misc/game-object-types";
-import { Bullet } from "../views/elements/bullet/bullet";
-import { MapItem } from "../views/elements/map/map-item";
-import { Unit } from "../views/elements/unit/unit";
+import { Bullet } from "../controllers/elements/bullet/bullet";
+import { MapItem } from "../controllers/elements/map/map-item";
+import { Unit } from "../controllers/elements/unit/unit";
+import { GameObject } from "../misc/game-object";
 
 export class GameModel extends Model {
-    public units: Unit[] = [];
-    public mapItems: MapItem[] = [];
-    public bullets: Bullet[] = [];
+    public units: Unit[];
+    public mapItems: MapItem[];
+    public bullets: Bullet[];
 
-    public playerLives: number = 3;
-    public enemiesLeft: number = 20;
+    public player: Unit;
+    public enemiesLeft: number;
+
+    public get playerLife(): number {
+        return this.player.life;
+    }
 
     public addUnit(unit: Unit): void {
+        if (unit.type === GameObjectTypes.Player) {
+            this.player = unit;
+        }
         if (unit.type === GameObjectTypes.Enemy) {
             this.enemiesLeft--;
         }
@@ -22,9 +30,6 @@ export class GameModel extends Model {
     }
 
     public removeUnit(unit: Unit): void {
-        if (unit.type === GameObjectTypes.Player) {
-            this.playerLives--;
-        }
         this.units = this.units.filter(b => b !== unit);
     }
 
@@ -53,4 +58,27 @@ export class GameModel extends Model {
     public removeBullet(bullet: Bullet): void {
         this.bullets = this.bullets.filter(b => b !== bullet);
     }  
+
+    public init(): void {
+        this.units = [];
+        this.mapItems = [];
+        this.bullets = [];
+
+        this.enemiesLeft = 20;
+    }
+
+    public update(): void {
+        const objects: GameObject[] = [
+            ...this.mapItems,
+            ...this.units,
+            ...this.bullets
+        ];
+
+        objects.forEach((object: GameObject) => {
+            object.update();
+            objects.forEach((otherObject: GameObject) => {
+                object.checkCollisionWith(otherObject);
+            })    
+        });
+    }
 }

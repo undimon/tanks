@@ -6,8 +6,8 @@ export class AppManager {
     public app: PIXI.Application;
     public resources: PIXI.LoaderResource;
 
-    protected sceneWidth: number = 900;
-    protected sceneHeight: number = 720;
+    protected sceneWidth: number = 768;
+    protected sceneHeight: number = 768;
 
     public keys: any = {};
 

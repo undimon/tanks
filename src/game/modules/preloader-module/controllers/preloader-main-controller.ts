@@ -1,15 +1,13 @@
 import { gsap } from "gsap";
-import { AppManager } from "../../../../framework/core/app-manager";
 import { GlobalNotifications } from "../../../../framework/core/global-notifications";
 import { Controller } from "../../../../framework/core/mvc/controller";
 import { INotification } from '../../../../framework/core/mvc/notification';
 import { GraphicsEngineNotifications } from "../../../../framework/modules/graphics-engine-module/misc/graphics-engine-names";
 import { MenuNotifications } from "../../menu-module/misc/menu-names";
 import { Config } from "../../misc/config";
-import { PreloaderNotifications } from "../misc/preloader-names";
-import { PreloaderInitView } from "../views/preloader-init-view";
+import { PreloaderMainView } from "../views/preloader-main-view";
 
-export class PreloaderInitController extends Controller {
+export class PreloaderMainController extends Controller {
     protected loadingInitialAssets: boolean = true;
 
     public addNotifications(): void {
@@ -39,20 +37,19 @@ export class PreloaderInitController extends Controller {
             // Have loaded the initial assets, so can draw the scene
             // and can start to load the rest of the game assets
             this.loadingInitialAssets = false;
-            (this.view as PreloaderInitView).drawScene();
+            (this.view as PreloaderMainView).drawScene();
             this.startAssetsLoading()
             return;
         }
         
         gsap.delayedCall(1, () => {
-            // Transition to menu scene
-            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, MenuNotifications.INIT);
+            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, MenuNotifications.SCENE);
         });
     }
 
     protected onAssetsLoadingProgress(notification: INotification): void {
         // Cannot display a progrees if there is no progress bar yet :)
         if (this.loadingInitialAssets) return;
-        (this.view as PreloaderInitView).updateProgressBar(notification.body);
+        (this.view as PreloaderMainView).updateProgressBar(notification.body);
     }
 }

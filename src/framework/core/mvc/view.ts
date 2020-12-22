@@ -24,7 +24,10 @@ export class View extends MVCEntity {
 
 	public layerTransitionInStart(): void {
 		this.display.visible = true;
-		gsap.fromTo(this.display, { alpha: 0 }, { duration: 0.5, alpha: 1 });
+		gsap.fromTo(this.display, { alpha: 0 }, { duration: 0.5, alpha: 1, onComplete: () => this.layerTransitionInComplete() });
+	}
+
+	public layerTransitionInComplete(): void {
 	}
 
 	public layerTransitionOutStart(): void {
@@ -35,8 +38,12 @@ export class View extends MVCEntity {
 			alpha: 0, 
 			onComplete: () => { 
 				this.display.visible = false;
+				this.layerTransitionOutComplete();
 			}
 		});
+	}
+
+	public layerTransitionOutComplete(): void {
 	}
 
 	public getTexture(name: string): Texture {

@@ -4,7 +4,7 @@ import { Container, Graphics, Sprite, Text } from "pixi.js";
 import { Config } from "../../misc/config";
 import { gsap } from 'gsap';
 
-export class PreloaderInitView extends View {
+export class PreloaderMainView extends View {
     protected bar: Sprite;
 
     public drawScene(): void {
@@ -15,7 +15,11 @@ export class PreloaderInitView extends View {
     }
  
     protected drawTitle(): void {
-        const text: Text = new Text('Loading game...');
+        const style = new PIXI.TextStyle({
+            fill: ['#ffffff', '#afaeae']
+        });
+
+        const text: Text = new Text('LOADING...', style);
         text.anchor.set(0.5);
         text.x = AppManager.getInstance().getSceneWidth() / 2;
         text.y = AppManager.getInstance().getSceneHeight() / 2;
@@ -24,7 +28,7 @@ export class PreloaderInitView extends View {
 
     protected drawBg(): void {
         const bg: Graphics = new Graphics();
-        bg.beginFill(0xDE3249);
+        bg.beginFill(0x0c1c33);
         bg.drawRect(0, 0, AppManager.getInstance().getSceneWidth(), AppManager.getInstance().getSceneHeight());
         bg.endFill();
         this.display.addChild(bg);

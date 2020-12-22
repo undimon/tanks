@@ -15,15 +15,15 @@ export class GameUiController extends Controller {
 
     public postRegister(): void {
         this.gameModel = this.retrieveModel(GameModels.GAME) as GameModel;
+        (this.view as GameUiView).initUi();
     }
 
     public execute(notification: INotification): void {
-        (this.view as GameUiView).initUi();
         this.updateUi();
     }
 
     public updateUi(notification?: INotification): void {
-        (this.view as GameUiView).updateLives(this.gameModel.playerLives);
+        (this.view as GameUiView).updateLives(this.gameModel.playerLife);
         (this.view as GameUiView).updateEnemies(this.gameModel.enemiesLeft);
     }
 }

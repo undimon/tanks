@@ -1,14 +1,14 @@
 import { Module } from "../../../framework/core/module";
 import { PreloaderNotifications } from "./misc/preloader-names";
-import { PreloaderInitController } from "./controllers/preloader-init-controller";
-import { PreloaderInitView } from "./views/preloader-init-view";
+import { PreloaderMainController } from "./controllers/preloader-main-controller";
+import { PreloaderMainView } from "./views/preloader-main-view";
 
 export class PreloaderModule extends Module {
     public registerControllers(): void {
-        this.addController(PreloaderNotifications.INIT, PreloaderInitController, PreloaderInitView);
+        this.addController(PreloaderNotifications.MAIN, PreloaderMainController, PreloaderMainView);
     }
 
     public registerScenes(): void {
-        this.addScene(PreloaderNotifications.INIT, [ PreloaderNotifications.INIT ]);
+        this.addScene(PreloaderNotifications.MAIN, [ PreloaderNotifications.MAIN ]);
     }
 }

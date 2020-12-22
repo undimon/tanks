@@ -41,6 +41,18 @@ export class UnitState extends State {
         // Prevent enemies from killing each other
         if (bullet.owner.type === this.unit.type) return;
         
-        this.unit.fsm.transition(UnitStates.Die);
-    }    
+        bullet.destroy();        
+        this.handleDeath(bullet);
+    } 
+
+    public handleDeath(object: GameObject): void {
+        if (this.unit.isImmortal) return;
+        
+        this.unit.life--;
+        this.unit.onHitOrHeal();
+
+        if (this.unit.life === 0) {
+            this.unit.fsm.transition(UnitStates.Die);
+        }
+    }  
 }

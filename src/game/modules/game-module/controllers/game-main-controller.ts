@@ -6,12 +6,15 @@ import { AppManager } from "../../../../framework/core/app-manager";
 import { GameObject } from "../misc/game-object";
 import { GameObjectTypes } from "../misc/game-object-types";
 import { UnitsFactory } from './factories/units-factory';
-import { Unit } from "../views/elements/unit/unit";
-import { Bullet, IBulletParams } from "../views/elements/bullet/bullet";
+import { Unit } from "./elements/unit/unit";
+import { Bullet, IBulletParams } from "./elements/bullet/bullet";
 import { GameModel } from "../models/game-model";
-import { MapFactory } from "./factories/map-factory";
-import { MapItem } from "../views/elements/map/map-item";
+import { MapItem } from "./elements/map/map-item";
 import { BulletsFactory } from "./factories/bullets-factory";
+import { GlobalNotifications } from "../../../../framework/core/global-notifications";
+import { GameOverNotifications } from "../../gameover-module/misc/gameover-names";
+import gsap from "gsap";
+import { MapFactory } from "./factories/map-factory";
 
 export class GameMainController extends Controller {
 
@@ -19,33 +22,37 @@ export class GameMainController extends Controller {
 
     protected bulletsFactory: BulletsFactory;
     protected unitsFactory: UnitsFactory;
+    protected mapFactory:  MapFactory;
+
+    protected enemySpawnDelay: number = 4;
+    protected shouldSpawnEnemy: boolean = true;
+
+    protected addBonusDelay: number = 3;
+    protected shouldAddBonus: boolean = true;
 
     public postRegister(): void {
         this.gameModel = this.retrieveModel(GameModels.GAME) as GameModel;
     }
 
-    public addNotifications(): void {
-        this.addNotification(GameNotifications.CREATE_BULLET, this.createBullet.bind(this));
-    }
-
     public execute(notification: INotification): void {
-        
+        this.gameModel.init();
+
         (this.view as GameMainView).initScene();
 
         this.initMap();
         this.initUnits();
         this.initBullets();
 
-        AppManager.getInstance().app.ticker.add(() => {
-            this.update();
-        }); 
+        gsap.delayedCall(1, () => {
+            AppManager.getInstance().app.ticker.add(this.update, this); 
+        });
     }
 
     protected initUnits(): void {
         this.unitsFactory = new UnitsFactory();
 
         this.unitsFactory.onCreateBullet = (params: IBulletParams) => {
-            this.sendNotification(GameNotifications.CREATE_BULLET, params);
+            this.bulletsFactory.createBullet(params);
         }
         this.unitsFactory.onUnitCreate = (unit: Unit) => {
             this.addToView(unit);
@@ -54,42 +61,46 @@ export class GameMainController extends Controller {
         this.unitsFactory.onUnitDestroy = (unit: Unit) => {
             this.gameModel.removeUnit(unit);
             if (unit.type === GameObjectTypes.Player) {
-                this.onPlayerDestroy();
+                this.gameOver();
             }
         };
+        this.unitsFactory.onUnitHitOrHeal = (unit: Unit) => {
+            if (unit.type === GameObjectTypes.Player) {
+                this.sendNotification(GameNotifications.UI_UPDATE);
+            }
+        };        
         this.unitsFactory.getSpawnPoint = (type: GameObjectTypes) => {
             return this.gameModel.getSpawnPoint(type);
         };
 
         this.unitsFactory.createPlayer();
+    }
 
-        setInterval(() => {
-            if (this.gameModel.enemiesLeft === 0) return;
-            this.unitsFactory.createEnemy();
-            this.sendNotification(GameNotifications.UI_UPDATE);
-        }, 2000); 
+    protected spawnNewEnemy(): void {
+        if (this.gameModel.enemiesLeft === 0) return;
+        if (!this.shouldSpawnEnemy) return;
         
-    }
-
-    protected onPlayerDestroy(): void {
+        this.shouldSpawnEnemy = false;
+        gsap.delayedCall(this.enemySpawnDelay, () => { this.shouldSpawnEnemy = true });
+        
+        this.unitsFactory.createEnemy();
         this.sendNotification(GameNotifications.UI_UPDATE);
-
-        if (this.gameModel.playerLives === 0) {
-            this.gameOver();
-            return;
-        }
-
-        this.unitsFactory.createPlayer();
     }
 
-    protected gameOver(): void {
-        console.log('game over');
+    protected addNewBonus(): void {
+        if (!this.shouldAddBonus) return;
+        
+        this.shouldAddBonus = false;
+        gsap.delayedCall(this.addBonusDelay, () => { this.shouldAddBonus = true });
+        
+        this.mapFactory.addRandomBonus();
+        //this.sendNotification(GameNotifications.UI_UPDATE);
     }
 
     protected initMap(): void {
-        const mapFactory: MapFactory = new MapFactory();
+        this.mapFactory = new MapFactory();
         
-        mapFactory.onMapItemCreate = (mapItem: MapItem) => {
+        this.mapFactory.onMapItemCreate = (mapItem: MapItem) => {
             // Trees should be above
             if (mapItem.type === GameObjectTypes.Tree) {
                 this.addToView(mapItem, true);
@@ -99,14 +110,14 @@ export class GameMainController extends Controller {
             }
             this.gameModel.addMapItem(mapItem);
         };
-        mapFactory.onMapItemDestroy = (mapItem: MapItem) => {
+        this.mapFactory.onMapItemDestroy = (mapItem: MapItem) => {
             if (mapItem.type === GameObjectTypes.Eagle) {
                 this.gameOver();
             }
             this.gameModel.removeMapItem(mapItem);
         };
 
-        mapFactory.createMapItems();
+        this.mapFactory.createMapItems();
     }
 
     protected initBullets(): void {
@@ -120,25 +131,19 @@ export class GameMainController extends Controller {
             this.gameModel.removeBullet(bullet);
         };
     }
-
-    protected createBullet(notification: INotification): void {
-        this.bulletsFactory.createBullet(notification.body);
-    }
     
-    protected update(): void {
+    protected gameOver(): void {
+        AppManager.getInstance().app.ticker.remove(this.update, this);
 
-        const objects: GameObject[] = [
-            ...this.gameModel.mapItems,
-            ...this.gameModel.units,
-            ...this.gameModel.bullets
-        ];
-
-        objects.forEach((object: GameObject) => {
-            object.update();
-            objects.forEach((otherObject: GameObject) => {
-                object.checkCollisionWith(otherObject);
-            })    
+        gsap.delayedCall(1, () => {
+            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, GameOverNotifications.SCENE);
         });
+    }
+
+    protected update(): void {
+        this.gameModel.update();
+        this.spawnNewEnemy();
+        this.addNewBonus();
     } 
 
     public addToView(gameObject: GameObject, placeInFront: boolean = false): void {

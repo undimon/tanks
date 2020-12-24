@@ -61,7 +61,8 @@ export class AppManager {
             width: this.sceneWidth, 
             height: this.sceneHeight, 
             //resolution: window.devicePixelRatio,
-            backgroundColor: 0xFFFFFF 
+            backgroundColor: 0xFFFFFF,
+            resizeTo: window
         });
         document.body.appendChild(this.pixiApp.view);
 
@@ -104,12 +105,5 @@ export class AppManager {
 
     protected handleKeyUp(event: KeyboardEvent): void {
         this.keys[event.code] = false;
-    }
-
-    protected resize() {
-       // this.app.renderer.resize(window.innerWidth, window.innerHeight);
-
-        //this.gecko.x = this.app.renderer.width / 2;
-        //this.gecko.y = this.app.renderer.height / 2;
     }
 }

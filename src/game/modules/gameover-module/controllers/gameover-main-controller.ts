@@ -5,14 +5,17 @@ import { GameOverMainView } from "../views/gameover-main-view";
 
 export class GameOverMainController extends Controller {
     
-    public execute(notification: INotification): void {
-
-        (this.view as GameOverMainView).drawScene(notification.body.isWin);
+    public postRegister(): void {
+        (this.view as GameOverMainView).drawScene();
 
         (this.view as GameOverMainView).drawMenuButtons(
             () => {
                 this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, GameNotifications.SCENE); 
             }
         );
+    }
+
+    public execute(notification: INotification): void {
+        (this.view as GameOverMainView).setTitle(notification.body.isWin);
     }
 }

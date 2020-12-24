@@ -5,6 +5,8 @@ import { Config } from "../../misc/config";
 
 export class GameOverMainView extends View {
 
+    protected titleTextField: Text;
+
     public drawMenuButtons(onPlayClick: Function): void {
         const playButton: Container = UiComponents.createButton("PLAY AGAIN", () => {
             onPlayClick();
@@ -34,6 +36,14 @@ export class GameOverMainView extends View {
             fill: ['#ffffff', '#afaeae']
         });
 
+        this.titleTextField = new Text('', style);
+        this.titleTextField.anchor.set(0.5);
+        this.titleTextField.x = this.getSceneWidth() / 2;
+        this.titleTextField.y = 250;
+        this.display.addChild(this.titleTextField);
+    }
+
+    public setTitle(isWin: boolean = false): void {
         let text: string;
        
         if (isWin) {
@@ -45,10 +55,6 @@ export class GameOverMainView extends View {
             this.playSound(Config.assets['soundLose']);
         }
 
-        const textField: Text = new Text(text, style);
-        textField.anchor.set(0.5);
-        textField.x = this.getSceneWidth() / 2;
-        textField.y = 250;
-        this.display.addChild(textField);
-    }
+        this.titleTextField.text = text;
+    }    
 }

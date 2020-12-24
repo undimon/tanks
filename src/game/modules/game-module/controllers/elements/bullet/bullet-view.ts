@@ -1,6 +1,5 @@
 import { ISize, Sprite } from 'pixi.js';
 import { Config } from "../../../../misc/config";
-import { AppManager } from "../../../../../../framework/core/app-manager";
 import { GameObject, MoveDirections } from "../../../misc/game-object";
 import { GameObjectView } from '../../../misc/game-object-view';
 import { IBulletParams } from './bullet';
@@ -21,9 +20,8 @@ export class BulletView extends GameObjectView {
     }
 
     public createBullet(params: IBulletParams): void {
-        //const bulletName: string = this.unit.type === UnitTypes.Player ? Config.assets['bullet'] : Config.assets['enemyBullet'];
         const bulletName: string = Config.assets['bullet'];
-        this.skin = new Sprite(AppManager.getInstance().getTexture(bulletName));
+        this.skin = new Sprite(this.getTexture(bulletName));
         this.skin.anchor.set(0.5);
         this.skin.scale.set(0.5);
         this.display.addChild(this.skin);        
@@ -36,6 +34,7 @@ export class BulletView extends GameObjectView {
     }
 
     public playExplosionAnimation(onComplete: Function): void {
+        this.playSound(Config.assets['soundHit']);
         this.skin.visible = false;
         this.speed = 0;
         this.explosion.x = this.skin.x;
@@ -48,7 +47,7 @@ export class BulletView extends GameObjectView {
     }
 
     protected initExplosionAnimation(): void {
-        this.explosion = new PIXI.AnimatedSprite(AppManager.getInstance().getSpriteTextures(Config.assets['explode'], 16, 68, 68));
+        this.explosion = new PIXI.AnimatedSprite(this.getSpriteTextures(Config.assets['explode'], 16, 68, 68));
         this.explosion.anchor.set(0.5);
         this.explosion.scale.set(0.5);
         this.explosion.loop = false;

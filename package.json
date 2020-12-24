@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "gsap": "^3.5.0",
+    "pixi-sound": "^3.0.5",
     "pixi.js": "^5.2.0"
   },
   "devDependencies": {

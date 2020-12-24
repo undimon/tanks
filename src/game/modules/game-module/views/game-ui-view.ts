@@ -1,7 +1,6 @@
 import { View } from "../../../../framework/core/mvc/view";
-import { Point, Text } from "pixi.js";
+import { Text } from "pixi.js";
 import { UiComponents } from "../../misc/ui-components";
-import { AppManager } from "../../../../framework/core/app-manager";
 
 export class GameUiView extends View {
     
@@ -16,7 +15,7 @@ export class GameUiView extends View {
     protected initLives(): void {
         this.livesText = UiComponents.createText('', 0xffffff);
         this.livesText.x = 20;
-        this.livesText.y = AppManager.getInstance().getSceneHeight() - 45;
+        this.livesText.y = this.getSceneHeight() - 45;
         this.display.addChild(this.livesText);
     }
 
@@ -26,8 +25,8 @@ export class GameUiView extends View {
 
     protected initEnemies(): void {
         this.enemiesText = UiComponents.createText('', 0xffffff);
-        this.enemiesText.x = AppManager.getInstance().getSceneWidth() - 180;
-        this.enemiesText.y = AppManager.getInstance().getSceneHeight() - 45;
+        this.enemiesText.x = this.getSceneWidth() - 180;
+        this.enemiesText.y = this.getSceneHeight() - 45;
         this.display.addChild(this.enemiesText);
     }
 

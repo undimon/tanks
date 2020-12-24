@@ -1,5 +1,4 @@
-import { Controller } from "../../../../framework/core/mvc/controller";
-import { INotification } from '../../../../framework/core/mvc/notification';
+import { Controller, INotification } from "../../../../framework/core/mvc/controller";
 import { GameModels, GameNotifications } from "../misc/game-names";
 import { GameModel } from "../models/game-model";
 import { GameMainView } from "../views/game-main-view";
@@ -24,6 +23,6 @@ export class GameUiController extends Controller {
 
     public updateUi(notification?: INotification): void {
         (this.view as GameUiView).updateLives(this.gameModel.playerLife);
-        (this.view as GameUiView).updateEnemies(this.gameModel.enemiesLeft);
+        (this.view as GameUiView).updateEnemies(this.gameModel.enemiesToSpawn);
     }
 }

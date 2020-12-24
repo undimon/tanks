@@ -1,7 +1,6 @@
 import { gsap } from "gsap";
 import { GlobalNotifications } from "../../../../framework/core/global-notifications";
-import { Controller } from "../../../../framework/core/mvc/controller";
-import { INotification } from '../../../../framework/core/mvc/notification';
+import { Controller, INotification } from "../../../../framework/core/mvc/controller";
 import { GraphicsEngineNotifications } from "../../../../framework/modules/graphics-engine-module/misc/graphics-engine-names";
 import { MenuNotifications } from "../../menu-module/misc/menu-names";
 import { Config } from "../../misc/config";

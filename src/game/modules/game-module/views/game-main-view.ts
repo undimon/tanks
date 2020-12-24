@@ -1,5 +1,4 @@
 import { View } from "../../../../framework/core/mvc/view";
-import { AppManager } from "../../../../framework/core/app-manager";
 import { Container, Graphics } from "pixi.js";
 
 export class GameMainView extends View {
@@ -19,7 +18,7 @@ export class GameMainView extends View {
         const bg: Graphics = new Graphics();
         bg.name = "background";
         bg.beginFill(0x0c1c33);
-        bg.drawRect(0, 0, AppManager.getInstance().getSceneWidth(), AppManager.getInstance().getSceneHeight());
+        bg.drawRect(0, 0, this.getSceneWidth(), this.getSceneHeight());
         bg.endFill();
         this.backDisplay.addChild(bg);
     }

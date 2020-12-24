@@ -1,7 +1,7 @@
 import { View } from "../../../../framework/core/mvc/view";
-import { AppManager } from "../../../../framework/core/app-manager";
-import { Container, Graphics, Point, Sprite, Text } from "pixi.js";
+import { Container, Graphics, Text } from "pixi.js";
 import { UiComponents } from "../../misc/ui-components";
+import { Config } from "../../misc/config";
 
 export class GameOverMainView extends View {
 
@@ -9,35 +9,46 @@ export class GameOverMainView extends View {
         const playButton: Container = UiComponents.createButton("PLAY AGAIN", () => {
             onPlayClick();
         });
-        playButton.x = AppManager.getInstance().getSceneWidth() / 2;
+        playButton.x = this.getSceneWidth() / 2;
         playButton.y = 400;
         this.display.addChild(playButton);   
     }
     
-    public drawScene(): void {
+    public drawScene(isWin: boolean = false): void {
         this.drawBg();
-        this.drawTitle();
+        this.drawTitle(isWin);
     }
  
     protected drawBg(): void {
         const bg: Graphics = new Graphics();
         bg.beginFill(0x0c1c33);
-        bg.drawRect(0, 0, AppManager.getInstance().getSceneWidth(), AppManager.getInstance().getSceneHeight());
+        bg.drawRect(0, 0, this.getSceneWidth(), this.getSceneHeight());
         bg.endFill();
         this.display.addChild(bg);
     }
 
-    protected drawTitle(): void {
+    protected drawTitle(isWin: boolean = false): void {
         const style = new PIXI.TextStyle({
             fontSize: 80,
             fontWeight: 'bold',
             fill: ['#ffffff', '#afaeae']
         });
 
-        const text: Text = new Text('GAME OVER', style);
-        text.anchor.set(0.5);
-        text.x = AppManager.getInstance().getSceneWidth() / 2;
-        text.y = 250;
-        this.display.addChild(text);
+        let text: string;
+       
+        if (isWin) {
+            text = 'CONGRATS!';
+            this.playSound(Config.assets['soundWin']);
+        }
+        else {
+            text = 'GAME OVER :(';
+            this.playSound(Config.assets['soundLose']);
+        }
+
+        const textField: Text = new Text(text, style);
+        textField.anchor.set(0.5);
+        textField.x = this.getSceneWidth() / 2;
+        textField.y = 250;
+        this.display.addChild(textField);
     }
 }

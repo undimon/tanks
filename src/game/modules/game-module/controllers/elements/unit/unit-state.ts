@@ -1,8 +1,8 @@
 import { State } from "../../../../../../framework/core/fsm/state";
+import { Config } from "../../../../misc/config";
 import { GameObject } from "../../../misc/game-object";
 import { Unit, UnitStates } from "./unit";
 import { UnitView } from "./unit-view";
-
 export class UnitState extends State {
     public unit: Unit;
     
@@ -29,6 +29,7 @@ export class UnitState extends State {
 
     public shoot(): void {
         this.unit.onShoot(this.view.getBulletParams());
+        this.unit.playSound(Config.assets['soundShoot']);
     }    
 
     public handleCollisionWithMapItem(object: GameObject): void {
@@ -48,6 +49,7 @@ export class UnitState extends State {
     public handleDeath(object: GameObject): void {
         if (this.unit.isImmortal) return;
         
+        this.unit.playSound(Config.assets['soundHit']);
         this.unit.life--;
         this.unit.onHitOrHeal();
 

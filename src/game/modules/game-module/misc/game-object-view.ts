@@ -1,8 +1,8 @@
 import { Container, ISize, Point, Texture } from "pixi.js";
-import { AppManager } from "../../../../framework/core/app-manager";
 import { GameObject, MoveDirections } from './game-object';
+import { MVCEntity } from '../../../../framework/core/mvc/mvc-entity';
 
-export class GameObjectView {
+export class GameObjectView extends MVCEntity {
     protected owner: GameObject;
     public display: Container = new Container();
     public size: ISize;
@@ -39,13 +39,5 @@ export class GameObjectView {
 
     public get center(): Point {
         return new Point(this.size.width / 2, this.size.height / 2);
-    }
-
-    protected getTexture(name: string): Texture {
-		return AppManager.getInstance().getTexture(name);
-    }
-    
-    protected getSpriteTextures(spriteName: string, framesCount: number, frameWidth: number, frameHeight: number): Texture[] {
-        return AppManager.getInstance().getSpriteTextures(spriteName, framesCount, frameWidth, frameHeight);
     }
 }

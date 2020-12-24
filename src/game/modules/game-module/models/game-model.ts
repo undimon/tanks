@@ -6,6 +6,7 @@ import { Bullet } from "../controllers/elements/bullet/bullet";
 import { MapItem } from "../controllers/elements/map/map-item";
 import { Unit } from "../controllers/elements/unit/unit";
 import { GameObject } from "../misc/game-object";
+import { Config } from "../../misc/config";
 
 export class GameModel extends Model {
     public units: Unit[];
@@ -13,24 +14,41 @@ export class GameModel extends Model {
     public bullets: Bullet[];
 
     public player: Unit;
-    public enemiesLeft: number;
+    public enemiesToSpawn: number;
+    public enemiesKilled: number;
 
     public get playerLife(): number {
         return this.player.life;
     }
+
+    public init(): void {
+        this.units = [];
+        this.mapItems = [];
+        this.bullets = [];
+
+        this.enemiesKilled = 0;
+        this.enemiesToSpawn = Config.enemiesOnLevel;
+    }    
 
     public addUnit(unit: Unit): void {
         if (unit.type === GameObjectTypes.Player) {
             this.player = unit;
         }
         if (unit.type === GameObjectTypes.Enemy) {
-            this.enemiesLeft--;
+            this.enemiesToSpawn--;
         }
         this.units.push(unit);
     }
 
     public removeUnit(unit: Unit): void {
+        if (unit.type === GameObjectTypes.Enemy) {
+            this.enemiesKilled++;
+        }
         this.units = this.units.filter(b => b !== unit);
+    }
+
+    public allEnemiesKilled(): boolean {
+        return this.enemiesKilled === Config.enemiesOnLevel;
     }
 
     public getSpawnPoint(type: GameObjectTypes): Point {
@@ -58,14 +76,6 @@ export class GameModel extends Model {
     public removeBullet(bullet: Bullet): void {
         this.bullets = this.bullets.filter(b => b !== bullet);
     }  
-
-    public init(): void {
-        this.units = [];
-        this.mapItems = [];
-        this.bullets = [];
-
-        this.enemiesLeft = 20;
-    }
 
     public update(): void {
         const objects: GameObject[] = [

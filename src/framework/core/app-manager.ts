@@ -1,9 +1,9 @@
 import { Container, Texture } from "pixi.js";
-
+import pixiSound from "pixi-sound";
 export class AppManager {
     protected static instance: AppManager;
     
-    public app: PIXI.Application;
+    public pixiApp: PIXI.Application;
     public resources: PIXI.LoaderResource;
 
     protected sceneWidth: number = 768;
@@ -35,7 +35,7 @@ export class AppManager {
 
     public startAssetsLoading(assets: Object, onComplete: Function, onProgress?: Function): void {
         const loader: PIXI.Loader = new PIXI.Loader();
-
+    
         Object.keys(assets).forEach((key: string) => {
             loader.add(assets[key], assets[key]);
         });
@@ -53,20 +53,33 @@ export class AppManager {
     }
 
     public addLayerToScene(container: Container): void {
-        this.app.stage.addChild(container);
+        this.pixiApp.stage.addChild(container);
     }
 
     protected initPixiApp(): void {
-        this.app = new PIXI.Application({ 
+        this.pixiApp = new PIXI.Application({ 
             width: this.sceneWidth, 
             height: this.sceneHeight, 
             //resolution: window.devicePixelRatio,
             backgroundColor: 0xFFFFFF 
         });
-        document.body.appendChild(this.app.view);
+        document.body.appendChild(this.pixiApp.view);
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
+    }
+
+    public playSound(name: string): void {
+        // For some reasone this doesn't work :(
+        //(this.resources[name] as PIXI.LoaderResource).sound.play();
+        
+        pixiSound.Sound.from({
+            url: name,
+            preload: true,
+            loaded: function(err, sound) {
+                sound.play();
+            }
+        });
     }
 
     public getTexture(name: string): Texture {

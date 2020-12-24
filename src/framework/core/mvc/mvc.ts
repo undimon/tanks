@@ -52,14 +52,15 @@ export class Mvc {
     protected handleSceneTransitionNotification(name: string, body?: any): void {
         if (name !== GlobalNotifications.TRANSITION_TO_SCENE) return;
         
-        const sceneNotification: string = body; 
+        let sceneNotification: string = body.scene ? body.scene : body;
+        
         // Run through all scenese
         this.scenes.forEach((scene: ISceneEntity) => {
             // Run through all controllers registered in the scene
             scene.controllersNotifications.forEach((notification: string) => {                  
                 // If the current scene is for transition - call its controllers
                 if (scene.sceneNotification === sceneNotification) {
-                    this.controllers[notification].execute({ name: notification, body: null });
+                    this.controllers[notification].execute({ name: notification, body });
                     this.controllers[notification].layerTransitionInStart();
                 }
                 else {

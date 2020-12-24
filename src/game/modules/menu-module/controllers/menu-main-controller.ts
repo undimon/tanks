@@ -1,6 +1,5 @@
 import { GlobalNotifications } from "../../../../framework/core/global-notifications";
-import { Controller } from "../../../../framework/core/mvc/controller";
-import { INotification } from '../../../../framework/core/mvc/notification';
+import { Controller, INotification } from "../../../../framework/core/mvc/controller";
 import { GameNotifications } from "../../game-module/misc/game-names";
 import { MenuMainView } from '../views/menu-main-view';
 

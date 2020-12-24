@@ -46,11 +46,11 @@ export class View extends MVCEntity {
 	public layerTransitionOutComplete(): void {
 	}
 
-	public getTexture(name: string): Texture {
-		return AppManager.getInstance().getTexture(name);
-	}
-    
-    public getSpriteTextures(spriteName: string, framesCount: number, frameWidth: number, frameHeight: number): Texture[] {
-        return AppManager.getInstance().getSpriteTextures(spriteName, framesCount, frameWidth, frameHeight);
-	}	
+    public getSceneWidth(): number {
+        return AppManager.getInstance().getSceneWidth();
+    }
+
+    public getSceneHeight(): number {
+        return AppManager.getInstance().getSceneHeight();
+    }	
 }

@@ -5,13 +5,6 @@ import { GameObjectTypes } from "../../../misc/game-object-types";
 import { UnitState } from "./unit-state";
 import { UnitView } from './unit-view';
 
-export enum UnitStates {
-    Spawn,
-    Idle,
-    Move,
-    Die
-}
-
 export class Unit extends GameObject {
     protected shootingDelay: number;
     protected canShoot: boolean = true;
@@ -55,7 +48,11 @@ export class Unit extends GameObject {
     }
 
     public handleCollisionWith(object: GameObject): void {
-        if (this.type === GameObjectTypes.Player && object.type === GameObjectTypes.Enemy) {
+        // if ((this.type === GameObjectTypes.Player && object.type === GameObjectTypes.Enemy) ||
+        //     (this.type === GameObjectTypes.Enemy && object.type === GameObjectTypes.Player)) {
+        //     this.state.handleCollisionWithOtherUnit(object);
+        // }        
+        if (object.type === GameObjectTypes.Player || object.type === GameObjectTypes.Enemy) {
             this.state.handleCollisionWithOtherUnit(object);
         }
         if (object.type === GameObjectTypes.Bullet) {
@@ -115,4 +112,11 @@ export class Unit extends GameObject {
         this.x = x + 6;
         this.y = y + 6;
     }    
+}
+
+export enum UnitStates {
+    Spawn,
+    Idle,
+    Move,
+    Die
 }

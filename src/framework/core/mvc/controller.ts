@@ -1,8 +1,6 @@
-import { Container } from "pixi.js";
-import { GameObject } from "../../../game/modules/game-module/misc/game-object";
+import { Ticker } from "pixi.js";
 import { Model } from "./model";
 import { MVCEntity } from "./mvc-entity";
-import { INotification } from "./notification";
 import { View } from "./view";
 
 export class Controller extends MVCEntity {
@@ -77,9 +75,17 @@ export class Controller extends MVCEntity {
 
 	public layerTransitionOutStart(): void {
         this.view.layerTransitionOutStart();
-    }       
+    }
+    
+    public getTicker(): Ticker {
+        return this.app.pixiApp.ticker; 
+    }
 }
 
+export interface INotification {
+	name: string;
+	body: any;
+}
 export interface INotificationHandler {
 	[name: string]: Function[];
 }

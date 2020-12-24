@@ -1,5 +1,5 @@
-import { Container, Graphics, IPoint, ISize, Point, Sprite, Texture } from "pixi.js";
-import { AppManager } from "../../../../../../framework/core/app-manager";
+import gsap from "gsap";
+import { Container, ISize, Sprite } from "pixi.js";
 import { Config } from "../../../../misc/config";
 import { GameObject } from "../../../misc/game-object";
 import { GameObjectTypes } from "../../../misc/game-object-types";
@@ -7,7 +7,7 @@ import { GameObjectTypes } from "../../../misc/game-object-types";
 export class MapItem extends GameObject {
     public display: Container = new Container();
     protected skin: Sprite;
-    public eagleExplosion: PIXI.AnimatedSprite;
+    public explosion: PIXI.AnimatedSprite;
     protected _size: ISize = {
         width: 32,
         height: 32
@@ -24,56 +24,25 @@ export class MapItem extends GameObject {
             return;
         };
 
-        let texture: string;
         if (type === GameObjectTypes.BrickWall) {
-            texture = 'brickWall';
+            this.initSkin('brickWall');
         }        
         if (type === GameObjectTypes.StoneWall) {
-            texture = 'stoneWall';
+            this.initSkin('stoneWall');
         }
         if (type === GameObjectTypes.Tree) {
-            texture = 'tree';
+            this.initSkin('tree');
         }        
         if (type === GameObjectTypes.Water) {
-            texture = 'water';
+            this.initSkin('water');
         }  
-        if (type === GameObjectTypes.Eagle) {
-            texture = 'eagle';
-            this.initEagleExplosionAnimation();
-        }
-        if (type === GameObjectTypes.BonusSpeed) {
-            texture = 'bonusSpeed';
-        }  
-        if (type === GameObjectTypes.BonusSlow) {
-            texture = 'bonusSlow';
-        }  
-        if (type === GameObjectTypes.BonusLife) {
-            texture = 'bonusLife';
-        }  
-        if (type === GameObjectTypes.BonusImmortal) {
-            texture = 'bonusImmortal';
-        }  
-
-        this.skin = new Sprite(AppManager.getInstance().getTexture(Config.assets[texture]));   
-        this.skin.width = this.size.width;     
-        this.skin.height = this.size.height;     
-        this.display.addChildAt(this.skin, 0);            
     }
 
-    protected initEagleExplosionAnimation(): void {
-        this.eagleExplosion = new PIXI.AnimatedSprite(AppManager.getInstance().getSpriteTextures(Config.assets['explode'], 16, 68, 68));
-        this.eagleExplosion.anchor.set(0.5);
-        this.eagleExplosion.x = this.size.width / 2;
-        this.eagleExplosion.y = this.size.height / 2;
-        this.eagleExplosion.loop = false;
-        this.eagleExplosion.visible = false;
-        this.display.addChild(this.eagleExplosion);
-    }    
-
-    public playEagleExposioAnimation(onComplete: Function): void {
-        this.eagleExplosion.visible = true;
-        this.eagleExplosion.play();
-        this.eagleExplosion.onComplete = () => onComplete();
+    protected initSkin(texture: string): void {
+        this.skin = new Sprite(this.getTexture(Config.assets[texture]));   
+        this.skin.width = this.size.width;     
+        this.skin.height = this.size.height;     
+        this.display.addChildAt(this.skin, 0); 
     }
 
     // Check collisions only with these types
@@ -86,31 +55,12 @@ export class MapItem extends GameObject {
     }   
     
     public handleCollisionWith(object: GameObject): void {
-        if (object.type === GameObjectTypes.Bullet) {
-            if (this.type === GameObjectTypes.BrickWall || this.type === GameObjectTypes.Eagle) {
-                this.destroy();
-            }   
-        }
-
-        if (object.type === GameObjectTypes.Player || object.type === GameObjectTypes.Enemy) {
-            if (this.type === GameObjectTypes.BonusImmortal || 
-                this.type === GameObjectTypes.BonusLife ||
-                this.type === GameObjectTypes.BonusSlow||
-                this.type === GameObjectTypes.BonusSpeed) {
-                this.destroy();
-            }
+        if (this.type === GameObjectTypes.BrickWall && object.type === GameObjectTypes.Bullet) {
+            this.destroy();
         }
     }
 
     public destroy(): void {
-        if (this.type === GameObjectTypes.Eagle) {
-            this.playEagleExposioAnimation(() => {
-                super.destroy();
-                this.display.destroy({ children: true });
-            });
-            return;
-        }
-
         super.destroy();
         this.display.destroy({ children: true });
     }

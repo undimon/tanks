@@ -1,10 +1,10 @@
 import { Container, ISize } from "pixi.js";
-import { AppManager } from "../../../../framework/core/app-manager";
 import { FSM } from "../../../../framework/core/fsm/fsm";
 import { GameObjectTypes } from "./game-object-types";
 import { GameObjectView } from "./game-object-view";
+import { MVCEntity } from '../../../../framework/core/mvc/mvc-entity';
 
-export class GameObject {
+export class GameObject extends MVCEntity {
     public type: GameObjectTypes;
     public owner: GameObject; 
     public fsm: FSM;
@@ -64,10 +64,6 @@ export class GameObject {
 
     public addToStage(holder: Container): void {
         holder.addChild(this.view.display);
-    }
-
-    protected getInput(): any {
-        return AppManager.getInstance().keys;
     }
 
     /**

@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import { Graphics, ISize, TilingSprite } from "pixi.js";
+import { ISize } from "pixi.js";
 import { Utils } from "../../../../../../utils";
 import { Config } from "../../../../misc/config";
 import { GameObject, MoveDirections } from "../../../misc/game-object";
@@ -127,6 +127,10 @@ export class UnitView extends GameObjectView {
     }
 
     public playDeathAnimation(onComplete: Function): void {
+        this.playSound(Config.assets['soundExplode']);
+
+        gsap.to(this.skin, { duration: 0.3, alpha: 0 });
+
         this.explosion.visible = true;
         this.explosion.play();
         this.explosion.onComplete = () => onComplete();

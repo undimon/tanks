@@ -1,8 +1,6 @@
-import { Controller } from "../../../../framework/core/mvc/controller";
-import { INotification } from '../../../../framework/core/mvc/notification';
+import { Controller, INotification } from "../../../../framework/core/mvc/controller";
 import { GameModels, GameNotifications } from "../misc/game-names";
 import { GameMainView } from "../views/game-main-view";
-import { AppManager } from "../../../../framework/core/app-manager";
 import { GameObject } from "../misc/game-object";
 import { GameObjectTypes } from "../misc/game-object-types";
 import { UnitsFactory } from './factories/units-factory';
@@ -44,7 +42,7 @@ export class GameMainController extends Controller {
         this.initBullets();
 
         gsap.delayedCall(1, () => {
-            AppManager.getInstance().app.ticker.add(this.update, this); 
+            this.getTicker().add(this.update, this); 
         });
     }
 
@@ -77,7 +75,7 @@ export class GameMainController extends Controller {
     }
 
     protected spawnNewEnemy(): void {
-        if (this.gameModel.enemiesLeft === 0) return;
+        if (this.gameModel.enemiesToSpawn === 0) return;
         if (!this.shouldSpawnEnemy) return;
         
         this.shouldSpawnEnemy = false;
@@ -132,11 +130,11 @@ export class GameMainController extends Controller {
         };
     }
     
-    protected gameOver(): void {
-        AppManager.getInstance().app.ticker.remove(this.update, this);
+    protected gameOver(isWin: boolean = false): void {
+        this.getTicker().remove(this.update, this);
 
         gsap.delayedCall(1, () => {
-            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, GameOverNotifications.SCENE);
+            this.sendNotification(GlobalNotifications.TRANSITION_TO_SCENE, { scene: GameOverNotifications.SCENE, isWin });
         });
     }
 
@@ -144,6 +142,10 @@ export class GameMainController extends Controller {
         this.gameModel.update();
         this.spawnNewEnemy();
         this.addNewBonus();
+
+        if (this.gameModel.allEnemiesKilled()) {
+            this.gameOver(true);
+        }
     } 
 
     public addToView(gameObject: GameObject, placeInFront: boolean = false): void {

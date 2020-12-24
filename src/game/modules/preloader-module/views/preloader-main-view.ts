@@ -1,5 +1,4 @@
 import { View } from "../../../../framework/core/mvc/view";
-import { AppManager } from "../../../../framework/core/app-manager";
 import { Container, Graphics, Sprite, Text } from "pixi.js";
 import { Config } from "../../misc/config";
 import { gsap } from 'gsap';
@@ -21,15 +20,15 @@ export class PreloaderMainView extends View {
 
         const text: Text = new Text('LOADING...', style);
         text.anchor.set(0.5);
-        text.x = AppManager.getInstance().getSceneWidth() / 2;
-        text.y = AppManager.getInstance().getSceneHeight() / 2;
+        text.x = this.getSceneWidth() / 2;
+        text.y = this.getSceneHeight() / 2;
         this.display.addChild(text);
     }
 
     protected drawBg(): void {
         const bg: Graphics = new Graphics();
         bg.beginFill(0x0c1c33);
-        bg.drawRect(0, 0, AppManager.getInstance().getSceneWidth(), AppManager.getInstance().getSceneHeight());
+        bg.drawRect(0, 0, this.getSceneWidth(), this.getSceneHeight());
         bg.endFill();
         this.display.addChild(bg);
     }
@@ -42,13 +41,13 @@ export class PreloaderMainView extends View {
         this.bar.width
         holder.addChild(bg, this.bar);
         holder.pivot.x = holder.width / 2;
-        holder.x = AppManager.getInstance().getSceneWidth() / 2;
-        holder.y = AppManager.getInstance().getSceneHeight() / 2 + 50;
+        holder.x = this.getSceneWidth() / 2;
+        holder.y = this.getSceneHeight() / 2 + 50;
         this.display.addChild(holder);
     }
 
     public updateProgressBar(progress: number): void {
-        // Emulating some throttling
+        // Emulate some throttling
         gsap.to(this.bar.scale, { duration: 1, x: progress / 100 });
         console.log(progress);
     }

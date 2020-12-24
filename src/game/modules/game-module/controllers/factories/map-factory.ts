@@ -2,6 +2,8 @@ import { Utils } from "../../../../../utils";
 import { GameObjectTypes } from "../../misc/game-object-types";
 import { MapItem } from "../elements/map/map-item";
 import { Config } from '../../../misc/config';
+import { EagleMapItem } from "../elements/map/eagle-map-item";
+import { BonusMapItem } from "../elements/map/bonus-map-item";
 
 export class MapFactory {
     
@@ -32,7 +34,31 @@ export class MapFactory {
         const y = Math.floor(index / this.mapWidth); 
         const x = index - this.mapWidth * y;
 
-        const item: MapItem = new MapItem(type, x, y);
+        let item: MapItem;
+
+        // Map objects
+        if (type === GameObjectTypes.StoneWall ||
+            type === GameObjectTypes.BrickWall ||
+            type === GameObjectTypes.Tree ||
+            type === GameObjectTypes.Water ||
+            type === GameObjectTypes.PlayerSpawnPoint ||
+            type === GameObjectTypes.EnemySpawnPoint) {
+            item = new MapItem(type, x, y);
+        }
+      
+        // Bonuses
+        if (type === GameObjectTypes.BonusImmortal ||
+            type === GameObjectTypes.BonusLife ||
+            type === GameObjectTypes.BonusSlow ||
+            type === GameObjectTypes.BonusSpeed) {
+            item = new BonusMapItem(type, x, y);
+        }
+
+        // Eagle
+        if (type === GameObjectTypes.Eagle) {
+            item = new EagleMapItem(type, x, y);
+        }
+                
         item.onDestroy = () => this.onMapItemDestroy(item);
         this.onMapItemCreate(item);  
     }

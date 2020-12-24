@@ -1,6 +1,5 @@
 import { AppManager } from "../../../core/app-manager";
-import { Controller } from "../../../core/mvc/controller";
-import { INotification } from "../../../core/mvc/notification";
+import { Controller, INotification } from "../../../core/mvc/controller";
 import { GraphicsEngineNotifications } from "../misc/graphics-engine-names";
 
 export class GraphicsEngineLoaderController extends Controller {
